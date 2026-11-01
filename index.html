@@ -5,11 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="ES2 Sampler" />
+  <meta name="apple-mobile-web-app-title" content="BeatForge XS2" />
   <meta name="theme-color" content="#820E17" />
   <link rel="manifest" href="manifest.json" />
-  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='36' fill='%23820E17'/><text x='96' y='115' text-anchor='middle' fill='white' font-family='sans-serif' font-weight='900' font-size='56'>ES2</text></svg>" />
-  <title>KORG Electribe Sampler ES2 (iOS Edition)</title>
+  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='36' fill='%23820E17'/><text x='96' y='115' text-anchor='middle' fill='white' font-family='sans-serif' font-weight='900' font-size='56'>XS2</text></svg>" />
+  <title>VORTEX BeatForge XS-2 Sampler & Synth</title>
   <style>
     * {
       box-sizing: border-box;
@@ -42,6 +42,11 @@
       flex-direction: column;
       justify-content: space-between;
       box-shadow: inset 0 0 28px rgba(0,0,0,0.6);
+      transition: background 0.25s ease, border-color 0.25s ease;
+    }
+    .chassis.blue-e2 {
+      background: radial-gradient(circle at center, #1F5A9E 0%, #10335C 55%, #07172B 100%);
+      border-color: #38BDF8;
     }
     .screw {
       position: absolute;
@@ -384,7 +389,7 @@
   <input type="file" id="kickFileInput" accept="audio/*,.wav,.mp3,.m4a,.aac,.ogg" style="display:none" />
   <input type="file" id="songFileInput" accept="audio/*,.wav,.mp3,.m4a,.aac,.ogg" style="display:none" />
 
-  <div class="chassis">
+  <div class="chassis" id="chassisBox">
     <div class="screw tl"></div>
     <div class="screw tr"></div>
     <div class="screw bl"></div>
@@ -392,10 +397,13 @@
 
     <!-- HEADER -->
     <div class="header">
-      <div class="header-step" id="stepHeader">KORG ELECTRIBE SAMPLER • STEP 01/16</div>
+      <div class="header-step" id="stepHeader">VORTEX BEATFORGE XS-2 SAMPLER • STEP 01/16</div>
       <div class="header-brand">
-        <div class="es2-badge">electribe sampler <span>ES2</span></div>
-        <div class="korg-logo">KORG</div>
+        <div class="es2-badge" id="btnToggleE2" style="cursor:pointer" title="Wechsle zwischen Roter XS-2 & Blauer XT-2">
+          <span id="badgeTitle" style="background:transparent;color:#FFF;font-size:10px;">beatforge sampler (RED)</span>
+          <span id="badgeSub">XS2</span>
+        </div>
+        <div class="korg-logo">VORTEX</div>
       </div>
     </div>
 
@@ -451,13 +459,14 @@
         </div>
       </div>
 
-      <!-- 3. RIGHT: OSCILLATOR, FILTER, MODULATION, AMP/EG, INSERT FX KNOBS -->
+      <!-- 3. RIGHT: OSCILLATOR, FILTER, MODULATION, AMP/EG, INSERT FX KNOBS + E2 BLUE CREATOR -->
       <div class="col-right">
         <div class="btn-row">
           <div class="hw-btn" id="btnOscPrev">◄ OSC</div>
           <div class="hw-btn" id="btnOscNext">OSC ►</div>
           <div class="hw-btn active-blue" id="btnFilterType">FLT: LPF</div>
           <div class="hw-btn" id="btnIfxToggle">IFX: OFF</div>
+          <div class="hw-btn" id="btnE2BlueMode">E2 BLAU</div>
         </div>
 
         <div class="knob-grid" id="knobRowTop"></div>
@@ -560,6 +569,92 @@
     let lastLoadedKickBuffer = null;
     let displayNotice = null;
     let xyTouch = null;
+
+    // Blaue Korg E2 Drum & Synth Creator State
+    let isBlueE2Mode = false;
+    const E2_DRUM_TYPES = [
+      { id: "KICK_909", label: "909 PUNCH KICK", short: "MY 909 BD" },
+      { id: "KICK_HARDTEK", label: "HARDTEK / GABBER", short: "HARD KICK" },
+      { id: "KICK_808", label: "808 SUB BOOM", short: "MY 808 BD" },
+      { id: "SNARE_ANALOG", label: "ANALOG SNARE", short: "MY SNARE" },
+      { id: "SNARE_TRAP", label: "CRISP / TRAP SD", short: "TRAP SD" },
+      { id: "CLAP_FAT", label: "CLUB CLAP", short: "MY CLAP" },
+      { id: "HIHAT_METAL", label: "METAL HI-HAT", short: "MY HIHAT" },
+      { id: "BASS_DONK", label: "FM DONK BASS", short: "MY DONK" }
+    ];
+    let e2TypeIdx = 0;
+    const e2Params = {
+      tune: 0.45,
+      sweep: 0.65,
+      click: 0.55,
+      snappy: 0.40,
+      drive: 0.25,
+      decay: 0.50
+    };
+
+    function bakeE2DrumToPart(targetPartId, preview = true) {
+      ensureAudio();
+      const sr = audioCtx.sampleRate;
+      const type = E2_DRUM_TYPES[e2TypeIdx].id;
+      const dur = type === "KICK_808" ? (0.28 + e2Params.decay * 0.85) : (0.16 + e2Params.decay * 0.50);
+      const len = Math.floor(sr * dur);
+      const buf = audioCtx.createBuffer(1, len, sr);
+      const data = buf.getChannelData(0);
+      let phase = 0, phase2 = 0;
+      const dt = 1 / sr;
+      const driveGain = 1 + e2Params.drive * 8.5;
+
+      for (let i = 0; i < len; i++) {
+        const t = i * dt;
+        const prog = i / len;
+        const ampEnv = Math.pow(1 - prog, 1.6 + (1 - e2Params.decay) * 1.8);
+        let raw = 0;
+        if (type.startsWith("KICK")) {
+          const baseF = type === "KICK_808" ? (34 + e2Params.tune * 32) : (44 + e2Params.tune * 46);
+          const drop = (80 + e2Params.sweep * 340) * Math.exp(-t * (18 + (1 - e2Params.sweep) * 26));
+          phase += 2 * Math.PI * (baseF + drop) * dt;
+          let body = Math.sin(phase);
+          if (type === "KICK_HARDTEK") body = Math.tanh(body * (1.8 + e2Params.snappy * 3));
+          const clickEnv = Math.exp(-t * 140);
+          const trans = (Math.sin(phase * 3.5) * 0.6 + (Math.random() * 2 - 1) * 0.4) * clickEnv * e2Params.click * 1.4;
+          raw = (body + trans) * ampEnv;
+        } else if (type.startsWith("SNARE")) {
+          const baseF = (type === "SNARE_TRAP" ? 160 : 125) + e2Params.tune * 140;
+          const drop = (60 + e2Params.sweep * 180) * Math.exp(-t * 32);
+          phase += 2 * Math.PI * (baseF + drop) * dt;
+          phase2 += 2 * Math.PI * (baseF * 1.48 + drop) * dt;
+          const body = (Math.sin(phase) * 0.65 + Math.sin(phase2) * 0.35) * Math.exp(-t * 16);
+          const wires = (Math.random() * 2 - 1) * (0.25 + e2Params.snappy * 0.95) * Math.pow(1 - prog, 1.2);
+          raw = body + wires + (Math.random() * 2 - 1) * Math.exp(-t * 120) * e2Params.click;
+        } else if (type === "CLAP_FAT") {
+          const sp = 0.008 + e2Params.sweep * 0.012;
+          const env = t < sp ? 1 : t < sp * 1.4 ? 0.15 : t < sp * 2.3 ? 0.9 : Math.exp(-(t - sp * 2.3) * 12);
+          raw = (Math.random() * 2 - 1) * env;
+        } else if (type === "HIHAT_METAL") {
+          phase += 2 * Math.PI * (310 + e2Params.tune * 420) * dt;
+          const sq = (Math.sin(phase) > 0 ? 0.3 : -0.3) + (Math.sin(phase * 1.44) > 0 ? 0.3 : -0.3);
+          raw = (sq + (Math.random() * 2 - 1) * (0.4 + e2Params.snappy * 0.6)) * ampEnv;
+        } else {
+          const baseF = 45 + e2Params.tune * 95;
+          const ratio = 2 + Math.round(e2Params.sweep * 4);
+          phase += 2 * Math.PI * baseF * dt;
+          phase2 += 2 * Math.PI * (baseF * ratio) * dt;
+          const mod = Math.sin(phase2) * (1.5 + e2Params.snappy * 7) * Math.exp(-t * 10);
+          raw = Math.sin(phase + mod) * ampEnv;
+        }
+        data[i] = e2Params.drive > 0.02 ? Math.tanh(raw * driveGain) : Math.max(-1, Math.min(1, raw));
+      }
+
+      lastLoadedKickBuffer = buf;
+      const p = parts[targetPartId - 1];
+      p.audioBuffer = buf;
+      p.hasCustomSample = true;
+      p.loopSample = false;
+      p.name = `${E2_DRUM_TYPES[e2TypeIdx].short} P${targetPartId}`;
+      p.category = "E2 CUSTOM";
+      p.isMuted = false;
+      if (preview) triggerPart(targetPartId, 1.0);
+    }
 
     // --- WEBAUDIO ENGINE ---
     let audioCtx = null;
@@ -778,8 +873,20 @@
           const dy = startY - e.clientY;
           const nextVal = Math.max(0, Math.min(1, startVal + dy / 90));
           parts[selectedPartId - 1][spec.key] = nextVal;
+          if (isBlueE2Mode) {
+            if (spec.key === "pitchGlide") e2Params.tune = nextVal;
+            else if (spec.key === "oscEdit") e2Params.sweep = nextVal;
+            else if (spec.key === "attack") e2Params.click = nextVal;
+            else if (spec.key === "modDepth") e2Params.snappy = nextVal;
+            else if (spec.key === "egInt") e2Params.drive = nextVal;
+            else if (spec.key === "decay") e2Params.decay = nextVal;
+            bakeE2DrumToPart(selectedPartId, false);
+          }
           displayNotice = `${spec.title}: ${Math.round(nextVal * 127)}`;
           renderUI();
+        });
+        circle.addEventListener("pointerup", () => {
+          if (isBlueE2Mode) triggerPart(selectedPartId, 0.95);
         });
         container.appendChild(wrap);
       });
@@ -991,8 +1098,41 @@
       renderUI();
     }
 
-    document.getElementById("btnOscPrev").onclick = () => { menuPageIdx = 0; stepValueEncoder(-1); };
-    document.getElementById("btnOscNext").onclick = () => { menuPageIdx = 0; stepValueEncoder(1); };
+    function toggleBlueE2() {
+      isBlueE2Mode = !isBlueE2Mode;
+      if (isBlueE2Mode) {
+        bakeE2DrumToPart(selectedPartId, true);
+        displayNotice = `BLUE E2 CREATOR: ${E2_DRUM_TYPES[e2TypeIdx].label}`;
+      } else {
+        displayNotice = "RED ES2 SAMPLER MODE";
+      }
+      renderUI();
+    }
+    document.getElementById("btnE2BlueMode").onclick = toggleBlueE2;
+    document.getElementById("btnToggleE2").onclick = toggleBlueE2;
+
+    document.getElementById("btnOscPrev").onclick = () => {
+      if (isBlueE2Mode) {
+        e2TypeIdx = (e2TypeIdx - 1 + E2_DRUM_TYPES.length) % E2_DRUM_TYPES.length;
+        bakeE2DrumToPart(selectedPartId, true);
+        displayNotice = `E2 CREATOR: ${E2_DRUM_TYPES[e2TypeIdx].label}`;
+        renderUI();
+      } else {
+        menuPageIdx = 0;
+        stepValueEncoder(-1);
+      }
+    };
+    document.getElementById("btnOscNext").onclick = () => {
+      if (isBlueE2Mode) {
+        e2TypeIdx = (e2TypeIdx + 1) % E2_DRUM_TYPES.length;
+        bakeE2DrumToPart(selectedPartId, true);
+        displayNotice = `E2 CREATOR: ${E2_DRUM_TYPES[e2TypeIdx].label}`;
+        renderUI();
+      } else {
+        menuPageIdx = 0;
+        stepValueEncoder(1);
+      }
+    };
 
     // Large VALUE Encoder drag gesture
     const valueKnobEl = document.getElementById("valueKnob");
@@ -1075,8 +1215,18 @@
     // --- RENDER UI ---
     function renderUI() {
       const activePart = parts[selectedPartId - 1];
-      document.getElementById("stepHeader").textContent =
-        `KORG ELECTRIBE SAMPLER • STEP ${String(currentStep).padStart(2, "0")}/16`;
+      const chassisBox = document.getElementById("chassisBox");
+      chassisBox.className = isBlueE2Mode ? "chassis blue-e2" : "chassis";
+      document.getElementById("badgeTitle").textContent = isBlueE2Mode ? "beatforge synth (BLUE)" : "beatforge sampler (RED)";
+      document.getElementById("badgeSub").textContent = isBlueE2Mode ? "XT2" : "XS2";
+      document.getElementById("btnE2BlueMode").className = `hw-btn ${isBlueE2Mode ? "active-blue" : ""}`;
+      document.getElementById("btnE2BlueMode").textContent = isBlueE2Mode ? "XS2 ROT" : "XT2 BLAU";
+      document.getElementById("btnOscPrev").textContent = isBlueE2Mode ? "◄ DRUM TYP" : "◄ OSC";
+      document.getElementById("btnOscNext").textContent = isBlueE2Mode ? "DRUM TYP ►" : "OSC ►";
+
+      document.getElementById("stepHeader").textContent = isBlueE2Mode
+        ? `VORTEX BEATFORGE XT-2 SYNTH CREATOR • ${E2_DRUM_TYPES[e2TypeIdx].label} • STEP ${String(currentStep).padStart(2, "0")}/16`
+        : `VORTEX BEATFORGE XS-2 SAMPLER • STEP ${String(currentStep).padStart(2, "0")}/16`;
 
       const oledTitle = document.getElementById("oledTitle");
       oledTitle.textContent = `PT${String(activePart.id).padStart(2, "0")}: ${activePart.name}`;
