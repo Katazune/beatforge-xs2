@@ -1,0 +1,1185 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="ES2 Sampler" />
+  <meta name="theme-color" content="#820E17" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='36' fill='%23820E17'/><text x='96' y='115' text-anchor='middle' fill='white' font-family='sans-serif' font-weight='900' font-size='56'>ES2</text></svg>" />
+  <title>KORG Electribe Sampler ES2 (iOS Edition)</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+      touch-action: none;
+    }
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      background: #111111;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .chassis {
+      position: relative;
+      width: calc(100vw - 12px);
+      height: calc(100vh - 12px);
+      background: radial-gradient(circle at center, #BA222D 0%, #820E17 55%, #420206 100%);
+      border: 1.5px solid #D43845;
+      border-radius: 16px;
+      padding: 10px 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-shadow: inset 0 0 28px rgba(0,0,0,0.6);
+    }
+    .screw {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      background: #1B1B1B;
+      border: 1px solid #3D3D3D;
+      border-radius: 50%;
+    }
+    .screw::after {
+      content: "";
+      position: absolute;
+      top: 4px; left: 2px; right: 2px;
+      height: 1px;
+      background: #0A0A0A;
+    }
+    .screw.tl { top: 8px; left: 8px; }
+    .screw.tr { top: 8px; right: 8px; }
+    .screw.bl { bottom: 8px; left: 8px; }
+    .screw.br { bottom: 8px; right: 8px; }
+
+    /* HEADER */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 24px;
+      flex-shrink: 0;
+    }
+    .header-step {
+      color: #FFCDD2;
+      font-family: monospace;
+      font-size: 11px;
+      font-weight: bold;
+    }
+    .header-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .es2-badge {
+      background: #1E1E1E;
+      border: 1px solid #EEEEEE;
+      border-radius: 3px;
+      padding: 2px 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: #FFF;
+      font-size: 10px;
+      font-weight: bold;
+    }
+    .es2-badge span {
+      background: #FFF;
+      color: #820E17;
+      padding: 0 3px;
+      font-size: 9px;
+      font-weight: 900;
+    }
+    .korg-logo {
+      color: #FFF;
+      font-size: 19px;
+      font-weight: 900;
+      letter-spacing: 1.5px;
+    }
+
+    /* MIDDLE SECTION */
+    .middle-section {
+      display: flex;
+      gap: 10px;
+      flex: 1;
+      min-height: 0;
+      margin: 4px 0;
+    }
+    .col-left {
+      flex: 0.34;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      min-width: 0;
+    }
+    .col-center {
+      flex: 0.18;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      min-width: 0;
+    }
+    .col-right {
+      flex: 0.48;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-width: 0;
+    }
+
+    /* OLED DISPLAY */
+    .oled {
+      background: #000000;
+      border: 1.5px solid #263238;
+      border-radius: 4px;
+      padding: 4px 8px;
+      font-family: monospace;
+      flex-shrink: 0;
+    }
+    .oled-row1 {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      font-weight: bold;
+      color: #79D5FF;
+    }
+    .oled-row1 .custom-smp { color: #4ADE80; }
+    .oled-row2 {
+      font-size: 10px;
+      color: #99E2FF;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-top: 2px;
+    }
+    .oled-row2.notice { color: #FFD166; }
+
+    /* XY TOUCHPAD */
+    .xy-pad {
+      position: relative;
+      flex: 1;
+      background: linear-gradient(180deg, #090909 0%, #161616 100%);
+      border: 1px solid #0D0D0D;
+      border-radius: 6px;
+      overflow: hidden;
+      cursor: crosshair;
+    }
+    .xy-pad canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+    .xy-label {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: rgba(255,255,255,0.32);
+      font-size: 9px;
+      font-weight: bold;
+      pointer-events: none;
+    }
+
+    /* BUTTONS */
+    .btn-row {
+      display: flex;
+      gap: 3px;
+      width: 100%;
+    }
+    .hw-btn {
+      flex: 1;
+      height: 22px;
+      background: #212121;
+      border: 1px solid #121212;
+      border-radius: 3px;
+      color: #E0E0E0;
+      font-size: 8.5px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      padding: 0 3px;
+      white-space: nowrap;
+    }
+    .hw-btn:active { filter: brightness(1.25); }
+    .hw-btn.active-red { background: #C01525; border-color: #FFF; color: #FFF; }
+    .hw-btn.active-blue { background: #0284C7; border-color: #FFF; color: #FFF; }
+    .hw-btn.active-amber { background: #D97706; border-color: #FFF; color: #FFF; }
+    .hw-btn.active-green { background: #059669; border-color: #FFF; color: #FFF; }
+    .hw-btn.active-purple { background: #9333EA; border-color: #FFF; color: #FFF; }
+
+    /* KNOBS */
+    .knob-grid {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+    }
+    .knob-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 19%;
+    }
+    .knob-group {
+      font-size: 6.5px;
+      color: #FFCDD2;
+      font-weight: 600;
+    }
+    .knob-circle {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%, #383838, #141414);
+      border: 1.5px solid #0A0A0A;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.6);
+      position: relative;
+      cursor: ns-resize;
+      margin: 2px 0;
+    }
+    .knob-indicator {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 2px;
+      height: 44%;
+      background: #FFFFFF;
+      transform-origin: top center;
+      border-radius: 2px;
+    }
+    .knob-title {
+      font-size: 7.5px;
+      color: #FFFFFF;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    /* LARGE VALUE ENCODER */
+    .value-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .value-knob {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%, #484848, #121212);
+      border: 2px solid #0A0A0A;
+      box-shadow: 0 4px 7px rgba(0,0,0,0.7);
+      position: relative;
+      cursor: ns-resize;
+    }
+    .value-knob::after {
+      content: "";
+      position: absolute;
+      inset: 7px;
+      border-radius: 50%;
+      border: 1px solid #2A2A2A;
+    }
+    .value-label {
+      font-size: 8px;
+      color: #FFF;
+      font-weight: bold;
+      margin-top: 2px;
+    }
+
+    /* TRANSPORT BAR */
+    .transport-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 6px;
+      padding: 2px 0;
+      flex-shrink: 0;
+    }
+    .transport-left {
+      display: flex;
+      gap: 5px;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+    }
+    .fn-btn {
+      background: #232323;
+      border: 1px solid #121212;
+      border-radius: 4px;
+      padding: 4px 8px;
+      color: #CCCCCC;
+      font-size: 8.5px;
+      font-weight: bold;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .fn-btn.active-red { background: #C01525; border-color: rgba(255,255,255,0.7); color: #FFF; }
+    .fn-btn.active-seq { background: #991B1B; border-color: rgba(255,255,255,0.7); color: #FFF; }
+    .fn-btn.active-blue { background: #007ACC; border-color: rgba(255,255,255,0.7); color: #FFF; }
+    .fn-btn.active-amber { background: #D97706; border-color: rgba(255,255,255,0.7); color: #FFF; }
+    .fn-btn.active-green { background: #10B981; border-color: rgba(255,255,255,0.7); color: #FFF; }
+    .fn-btn.active-rec { background: #EF4444; border-color: rgba(255,255,255,0.7); color: #FFF; }
+    .fn-btn.active-purple { background: #9333EA; border-color: rgba(255,255,255,0.7); color: #FFF; }
+
+    .part-indicator {
+      color: #E5E5E5;
+      font-size: 11px;
+      font-weight: bold;
+      white-space: nowrap;
+    }
+
+    /* 16 RUBBER PADS */
+    .pads-section {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      flex-shrink: 0;
+    }
+    .pads-row {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 6px;
+    }
+    .rubber-pad {
+      height: 44px;
+      background: #282828;
+      border: 1.5px solid #141414;
+      border-radius: 6px;
+      box-shadow: 0 3px 5px rgba(0,0,0,0.5);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+    .rubber-pad .pad-num {
+      font-size: 11px;
+      font-weight: 800;
+      color: #BBBBBB;
+      z-index: 1;
+    }
+    .rubber-pad .pad-sub {
+      font-size: 7px;
+      font-weight: 600;
+      color: #888888;
+      z-index: 1;
+    }
+    .rubber-pad.lit .pad-num { color: #FFFFFF; }
+    .rubber-pad.lit .pad-sub { color: #EEEEEE; }
+  </style>
+</head>
+<body>
+  <!-- Hidden File Inputs for iOS Safari / Files / Voice Memos -->
+  <input type="file" id="kickFileInput" accept="audio/*,.wav,.mp3,.m4a,.aac,.ogg" style="display:none" />
+  <input type="file" id="songFileInput" accept="audio/*,.wav,.mp3,.m4a,.aac,.ogg" style="display:none" />
+
+  <div class="chassis">
+    <div class="screw tl"></div>
+    <div class="screw tr"></div>
+    <div class="screw bl"></div>
+    <div class="screw br"></div>
+
+    <!-- HEADER -->
+    <div class="header">
+      <div class="header-step" id="stepHeader">KORG ELECTRIBE SAMPLER • STEP 01/16</div>
+      <div class="header-brand">
+        <div class="es2-badge">electribe sampler <span>ES2</span></div>
+        <div class="korg-logo">KORG</div>
+      </div>
+    </div>
+
+    <!-- MIDDLE HARDWARE CONTROLS -->
+    <div class="middle-section">
+      <!-- 1. LEFT: OLED + KAOSS PAD + PAD MODE BUTTONS -->
+      <div class="col-left">
+        <div class="oled">
+          <div class="oled-row1">
+            <span id="oledTitle">PT01: BD 909 PUNCH</span>
+            <span id="oledBpm">128 BPM ❚❚</span>
+          </div>
+          <div class="oled-row2" id="oledSub">OSC: 1 BD 909 PUNCH (LPF)</div>
+        </div>
+
+        <div class="xy-pad" id="xyPad">
+          <canvas id="xyCanvas"></canvas>
+          <div class="xy-label" id="xyModeLabel">TOUCH SCALE</div>
+        </div>
+
+        <div class="btn-row">
+          <div class="hw-btn" id="btnPrevPt">◄ PT</div>
+          <div class="hw-btn" id="btnNextPt">PT ►</div>
+          <div class="hw-btn active-red" id="btnTScale">T.SCALE</div>
+          <div class="hw-btn" id="btnGArp">G.ARP</div>
+          <div class="hw-btn" id="btnMFx">M.FX</div>
+        </div>
+      </div>
+
+      <!-- 2. CENTER: MENU + VALUE ENCODER + KICK/PAD ASSIGN + MUTE/ERASE -->
+      <div class="col-center">
+        <div class="btn-row">
+          <div class="hw-btn" id="btnMenuPrev">◄ MENU</div>
+          <div class="hw-btn" id="btnMenuNext">MENU ►</div>
+        </div>
+
+        <div class="value-wrap">
+          <div class="value-knob" id="valueKnob">
+            <div class="knob-indicator" id="valueIndicator" style="transform: translate(-50%, 0) rotate(180deg);"></div>
+          </div>
+          <div class="value-label" id="valueKnobLabel">OSC / SAMPLE</div>
+        </div>
+
+        <div style="width:100%; display:flex; flex-direction:column; gap:3px;">
+          <div class="btn-row">
+            <div class="hw-btn" id="btnAddKick">+ KICK</div>
+            <div class="hw-btn" id="btnAssignPad">-> TASTE</div>
+          </div>
+          <div class="btn-row">
+            <div class="hw-btn" id="btnPtMute">PT MUTE</div>
+            <div class="hw-btn" id="btnErase">ERASE</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. RIGHT: OSCILLATOR, FILTER, MODULATION, AMP/EG, INSERT FX KNOBS -->
+      <div class="col-right">
+        <div class="btn-row">
+          <div class="hw-btn" id="btnOscPrev">◄ OSC</div>
+          <div class="hw-btn" id="btnOscNext">OSC ►</div>
+          <div class="hw-btn active-blue" id="btnFilterType">FLT: LPF</div>
+          <div class="hw-btn" id="btnIfxToggle">IFX: OFF</div>
+        </div>
+
+        <div class="knob-grid" id="knobRowTop"></div>
+        <div class="knob-grid" id="knobRowBottom"></div>
+      </div>
+    </div>
+
+    <!-- TRANSPORT & MODE BAR -->
+    <div class="transport-bar">
+      <div class="transport-left">
+        <div class="fn-btn active-red" id="modeTrigger">TRIGGER</div>
+        <div class="fn-btn" id="modeSeq">SEQUENCER</div>
+        <div class="fn-btn" id="modeSelect">PART SELECT</div>
+        <div class="fn-btn" id="modeMute">PART MUTE</div>
+        <div class="fn-btn" id="btnPlay">► PLAY</div>
+        <div class="fn-btn" id="btnRec">● REC</div>
+        <div class="fn-btn" id="btnKickToPad">+ KICK -> PAD</div>
+        <div class="fn-btn" id="btnSongLoop">+ SONG LOOP</div>
+      </div>
+      <div class="part-indicator" id="partFooter">PART 1</div>
+    </div>
+
+    <!-- 16 RUBBER PADS -->
+    <div class="pads-section">
+      <div class="pads-row" id="padsRow1"></div>
+      <div class="pads-row" id="padsRow2"></div>
+    </div>
+  </div>
+
+  <script>
+    // --- PRESETS & STATE ---
+    const OSC_PRESETS = [
+      { name: "BD 909 PUNCH", cat: "DRUM" },
+      { name: "SD ANALOG", cat: "DRUM" },
+      { name: "HAND CLAP", cat: "DRUM" },
+      { name: "CLOSED HH", cat: "DRUM" },
+      { name: "OPEN HH", cat: "DRUM" },
+      { name: "RIMSHOT", cat: "DRUM" },
+      { name: "LOW TOM", cat: "DRUM" },
+      { name: "HI TOM", cat: "DRUM" },
+      { name: "SHAKER", cat: "DRUM" },
+      { name: "CRASH CYM", cat: "DRUM" },
+      { name: "ACID SAW 303", cat: "SYNTH" },
+      { name: "SUB BASS", cat: "SYNTH" },
+      { name: "DUAL SAW LEAD", cat: "SYNTH" },
+      { name: "MINOR CHORD", cat: "SYNTH" },
+      { name: "ZAP LASER", cat: "FX" },
+      { name: "SONG / LOOP", cat: "SAMPLE" },
+      { name: "BD 808 SUB", cat: "DRUM" },
+      { name: "FM BELL", cat: "SYNTH" }
+    ];
+
+    const FILTER_TYPES = ["LPF", "HPF", "BPF", "OFF"];
+    const IFX_TYPES = ["OFF", "DRIVE", "CRUSH", "DELAY"];
+    const MENU_PAGES = ["OSC / SAMPLE", "TEMPO BPM", "SWING %", "TOUCH SCALE", "INSERT FX TYPE"];
+    const SCALES = [
+      { label: "MINOR PENT", notes: [0, 3, 5, 7, 10, 12, 15, 17, 19, 22, 24] },
+      { label: "NATURAL MIN", notes: [0, 2, 3, 5, 7, 8, 10, 12, 14, 15, 17, 19] },
+      { label: "PHRYGIAN", notes: [0, 1, 3, 5, 7, 8, 10, 12, 13, 15, 17, 19] },
+      { label: "CHROMATIC", notes: Array.from({length: 25}, (_, i) => i) }
+    ];
+
+    const parts = Array.from({ length: 16 }, (_, i) => ({
+      id: i + 1,
+      name: OSC_PRESETS[i].name,
+      category: OSC_PRESETS[i].cat,
+      isMuted: false,
+      activeSteps: new Set(),
+      oscIndex: i,
+      pitchGlide: 0.5,
+      oscEdit: 0.2,
+      filterType: (i === 3 || i === 4 || i === 8 || i === 9) ? "HPF" : "LPF",
+      cutoff: 0.78,
+      resonance: 0.20,
+      egInt: 0.5,
+      modSpeed: 0.35,
+      modDepth: 0.20,
+      attack: 0.0,
+      decay: 0.48,
+      level: 0.85,
+      insertFxEnabled: false,
+      insertFxType: "DRIVE",
+      hasCustomSample: false,
+      loopSample: false,
+      audioBuffer: null,
+      activeSource: null
+    }));
+
+    let selectedPartId = 1;
+    let currentPadMode = "TRIGGER"; // TRIGGER, STEP_SEQ, PART_SELECT, MUTE
+    let touchpadMode = "TOUCH_SCALE"; // TOUCH_SCALE, GATE_ARP, MASTER_FX
+    let menuPageIdx = 0;
+    let scaleIdx = 0;
+    let currentStep = 1;
+    let isPlaying = false;
+    let isRecording = false;
+    let bpm = 128;
+    let swing = 50;
+    let isAssigningToPad = false;
+    let lastLoadedKickBuffer = null;
+    let displayNotice = null;
+    let xyTouch = null;
+
+    // --- WEBAUDIO ENGINE ---
+    let audioCtx = null;
+    let masterFilter = null;
+    let masterGain = null;
+
+    function ensureAudio() {
+      if (!audioCtx) {
+        const AC = window.AudioContext || window.webkitAudioContext;
+        audioCtx = new AC();
+        masterFilter = audioCtx.createBiquadFilter();
+        masterFilter.type = "lowpass";
+        masterFilter.frequency.value = 18000;
+        masterGain = audioCtx.createGain();
+        masterGain.gain.value = 0.9;
+        masterFilter.connect(masterGain);
+        masterGain.connect(audioCtx.destination);
+      }
+      if (audioCtx.state === "suspended") {
+        audioCtx.resume();
+      }
+    }
+
+    function stopPartLoop(part) {
+      if (part.activeSource) {
+        try { part.activeSource.stop(); } catch (_) {}
+        part.activeSource = null;
+      }
+    }
+
+    function stopAllSongLoops() {
+      parts.forEach(p => {
+        if (p.hasCustomSample && p.loopSample) {
+          stopPartLoop(p);
+        }
+      });
+    }
+
+    function triggerPart(partId, velocity = 1.0, semitoneOffset = 0) {
+      ensureAudio();
+      const part = parts[partId - 1];
+      if (!part || part.isMuted) return;
+
+      const now = audioCtx.currentTime;
+      const totalSemi = ((part.pitchGlide - 0.5) * 24) + semitoneOffset;
+      const pitchMul = Math.pow(2, totalSemi / 12);
+
+      // Custom Sample / Kick / Song Playback
+      if (part.hasCustomSample && part.audioBuffer) {
+        stopPartLoop(part);
+        const src = audioCtx.createBufferSource();
+        src.buffer = part.audioBuffer;
+        src.loop = part.loopSample;
+        src.playbackRate.value = pitchMul;
+
+        const flt = audioCtx.createBiquadFilter();
+        if (part.filterType === "OFF") {
+          flt.type = "allpass";
+        } else {
+          flt.type = part.filterType === "HPF" ? "highpass" : part.filterType === "BPF" ? "bandpass" : "lowpass";
+          flt.frequency.value = 60 + part.cutoff * part.cutoff * 12000;
+          flt.Q.value = 0.7 + part.resonance * 12;
+        }
+
+        const gain = audioCtx.createGain();
+        gain.gain.value = part.level * velocity;
+
+        src.connect(flt);
+        flt.connect(gain);
+        gain.connect(masterFilter);
+
+        const startOffset = part.loopSample ? 0 : (part.oscEdit * 0.7 * part.audioBuffer.duration);
+        src.start(now, startOffset);
+        part.activeSource = src;
+        src.onended = () => {
+          if (part.activeSource === src) part.activeSource = null;
+        };
+        return;
+      }
+
+      // Built-in Synth & Drum Engine (909 Kick, Snare, Hats, 303 Acid, etc.)
+      const gain = audioCtx.createGain();
+      const flt = audioCtx.createBiquadFilter();
+      flt.type = part.filterType === "HPF" ? "highpass" : part.filterType === "BPF" ? "bandpass" : "lowpass";
+      flt.frequency.setValueAtTime(80 + part.cutoff * part.cutoff * 10000, now);
+      flt.Q.value = 0.7 + part.resonance * 10;
+
+      const decaySec = 0.08 + part.decay * 0.55;
+      gain.gain.setValueAtTime(part.level * velocity, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + decaySec);
+
+      flt.connect(gain);
+      gain.connect(masterFilter);
+
+      const oscIdx = part.oscIndex;
+      if (oscIdx === 0 || oscIdx === 16 || oscIdx === 6 || oscIdx === 7) {
+        // 909 / 808 Kick & Toms
+        const osc = audioCtx.createOscillator();
+        osc.type = "sine";
+        const startFreq = (oscIdx === 0 ? 155 : oscIdx === 16 ? 120 : oscIdx === 6 ? 130 : 200) * pitchMul;
+        const endFreq = (oscIdx === 16 ? 38 : 48) * pitchMul;
+        osc.frequency.setValueAtTime(startFreq, now);
+        osc.frequency.exponentialRampToValueAtTime(Math.max(25, endFreq), now + 0.09);
+        osc.connect(flt);
+        osc.start(now);
+        osc.stop(now + decaySec);
+      } else if (oscIdx === 1 || oscIdx === 2 || oscIdx === 3 || oscIdx === 4 || oscIdx === 8 || oscIdx === 9) {
+        // Snare, Clap, Hi-Hats, Shaker, Crash (Noise + Tone)
+        const bufSize = Math.floor(audioCtx.sampleRate * decaySec);
+        const noiseBuf = audioCtx.createBuffer(1, bufSize, audioCtx.sampleRate);
+        const data = noiseBuf.getChannelData(0);
+        for (let i = 0; i < bufSize; i++) data[i] = Math.random() * 2 - 1;
+        const noise = audioCtx.createBufferSource();
+        noise.buffer = noiseBuf;
+        noise.connect(flt);
+        noise.start(now);
+        if (oscIdx === 1) {
+          const body = audioCtx.createOscillator();
+          body.type = "triangle";
+          body.frequency.setValueAtTime(185 * pitchMul, now);
+          body.frequency.exponentialRampToValueAtTime(95 * pitchMul, now + 0.08);
+          body.connect(flt);
+          body.start(now);
+          body.stop(now + decaySec);
+        }
+      } else {
+        // Acid Saw 303, Sub Bass, Leads, Chords
+        const osc = audioCtx.createOscillator();
+        osc.type = (oscIdx === 11) ? "sine" : "sawtooth";
+        const baseFreq = (oscIdx === 11 ? 65.41 : oscIdx === 10 ? 110 : 220) * pitchMul;
+        osc.frequency.setValueAtTime(baseFreq, now);
+        osc.connect(flt);
+        osc.start(now);
+        osc.stop(now + decaySec);
+      }
+    }
+
+    // --- SEQUENCER LOOP ---
+    let seqTimer = null;
+    function startSequencer() {
+      ensureAudio();
+      isPlaying = true;
+      currentStep = 1;
+      // Start any loaded Song Loop automatically
+      parts.forEach(p => {
+        if (p.hasCustomSample && p.loopSample && !p.isMuted && !p.activeSource) {
+          triggerPart(p.id, 0.95);
+        }
+      });
+      runStep();
+    }
+
+    function stopSequencer() {
+      isPlaying = false;
+      if (seqTimer) clearTimeout(seqTimer);
+      seqTimer = null;
+      stopAllSongLoops();
+      renderUI();
+    }
+
+    function runStep() {
+      if (!isPlaying) return;
+      parts.forEach(p => {
+        if (!p.isMuted && p.activeSteps.has(currentStep)) {
+          triggerPart(p.id, 0.9);
+        }
+      });
+      renderUI();
+      const baseMs = (60000 / bpm) / 4;
+      const swingFactor = (swing - 50) / 50;
+      const delayMs = (currentStep % 2 === 1) ? baseMs * (1 + swingFactor) : baseMs * (1 - swingFactor);
+      seqTimer = setTimeout(() => {
+        currentStep = currentStep >= 16 ? 1 : currentStep + 1;
+        runStep();
+      }, delayMs);
+    }
+
+    // --- KNOB SETUP ---
+    const TOP_KNOBS = [
+      { group: "OSCILLATOR", title: "PITCH/GLIDE", key: "pitchGlide" },
+      { group: "OSCILLATOR", title: "EDIT/START", key: "oscEdit" },
+      { group: "FILTER", title: "CUTOFF", key: "cutoff" },
+      { group: "FILTER", title: "RESONANCE", key: "resonance" },
+      { group: "FILTER", title: "EG INT", key: "egInt" }
+    ];
+    const BOT_KNOBS = [
+      { group: "MODULATION", title: "SPEED", key: "modSpeed" },
+      { group: "MODULATION", title: "DEPTH", key: "modDepth" },
+      { group: "AMP/EG", title: "ATTACK", key: "attack" },
+      { group: "AMP/EG", title: "DECAY/REL", key: "decay" },
+      { group: "AMP / IFX", title: "LEVEL", key: "level" }
+    ];
+
+    function createKnobRow(containerId, specs) {
+      const container = document.getElementById(containerId);
+      specs.forEach(spec => {
+        const wrap = document.createElement("div");
+        wrap.className = "knob-wrap";
+        wrap.innerHTML = `
+          <div class="knob-group">${spec.group}</div>
+          <div class="knob-circle" data-key="${spec.key}">
+            <div class="knob-indicator" id="ind_${spec.key}"></div>
+          </div>
+          <div class="knob-title">${spec.title}</div>
+        `;
+        const circle = wrap.querySelector(".knob-circle");
+        let startY = 0;
+        let startVal = 0;
+        circle.addEventListener("pointerdown", e => {
+          circle.setPointerCapture(e.pointerId);
+          startY = e.clientY;
+          startVal = parts[selectedPartId - 1][spec.key];
+        });
+        circle.addEventListener("pointermove", e => {
+          if (!circle.hasPointerCapture(e.pointerId)) return;
+          const dy = startY - e.clientY;
+          const nextVal = Math.max(0, Math.min(1, startVal + dy / 90));
+          parts[selectedPartId - 1][spec.key] = nextVal;
+          displayNotice = `${spec.title}: ${Math.round(nextVal * 127)}`;
+          renderUI();
+        });
+        container.appendChild(wrap);
+      });
+    }
+    createKnobRow("knobRowTop", TOP_KNOBS);
+    createKnobRow("knobRowBottom", BOT_KNOBS);
+
+    // --- 16 PADS CREATION ---
+    function createPads() {
+      const r1 = document.getElementById("padsRow1");
+      const r2 = document.getElementById("padsRow2");
+      for (let i = 1; i <= 16; i++) {
+        const pad = document.createElement("div");
+        pad.className = "rubber-pad";
+        pad.id = `pad_${i}`;
+        pad.innerHTML = `<div class="pad-num">${i}</div><div class="pad-sub" id="padsub_${i}"></div>`;
+        pad.addEventListener("pointerdown", () => handlePadTap(i));
+        (i <= 8 ? r1 : r2).appendChild(pad);
+      }
+    }
+    createPads();
+
+    function handlePadTap(index) {
+      ensureAudio();
+      const part = parts[index - 1];
+      const activePart = parts[selectedPartId - 1];
+
+      if (isAssigningToPad) {
+        const srcBuf = lastLoadedKickBuffer || activePart.audioBuffer;
+        if (srcBuf) {
+          part.audioBuffer = srcBuf;
+          part.hasCustomSample = true;
+          part.loopSample = false;
+          part.name = `KICK P${index}`;
+          part.category = "USER KICK";
+          part.isMuted = false;
+        } else {
+          Object.assign(part, {
+            ...activePart,
+            id: index,
+            activeSteps: part.activeSteps,
+            isMuted: false
+          });
+        }
+        selectedPartId = index;
+        isAssigningToPad = false;
+        displayNotice = `KICK AUF PAD ${index} GELEGT!`;
+        triggerPart(index, 1.0);
+        renderUI();
+        return;
+      }
+
+      if (currentPadMode === "TRIGGER") {
+        selectedPartId = index;
+        displayNotice = null;
+        triggerPart(index, 1.0);
+        if (isRecording && isPlaying && !(part.hasCustomSample && part.loopSample)) {
+          part.activeSteps.add(currentStep);
+        }
+      } else if (currentPadMode === "STEP_SEQ") {
+        if (activePart.activeSteps.has(index)) {
+          activePart.activeSteps.delete(index);
+        } else {
+          activePart.activeSteps.add(index);
+          if (!(activePart.hasCustomSample && activePart.loopSample && activePart.activeSource)) {
+            triggerPart(activePart.id, 0.9);
+          }
+        }
+      } else if (currentPadMode === "PART_SELECT") {
+        selectedPartId = index;
+        displayNotice = null;
+        if (!(part.hasCustomSample && part.loopSample && part.activeSource)) {
+          triggerPart(index, 0.8);
+        }
+      } else if (currentPadMode === "MUTE") {
+        part.isMuted = !part.isMuted;
+        if (part.isMuted) stopPartLoop(part);
+      }
+      renderUI();
+    }
+
+    // --- FILE IMPORT (CUSTOM KICKS & SONG LOOPS) ---
+    async function decodeAudioFile(file) {
+      ensureAudio();
+      const arrayBuf = await file.arrayBuffer();
+      return await audioCtx.decodeAudioData(arrayBuf);
+    }
+
+    const kickInput = document.getElementById("kickFileInput");
+    kickInput.addEventListener("change", async e => {
+      const file = e.target.files[0];
+      if (!file) return;
+      displayNotice = "LOADING CUSTOM KICK...";
+      renderUI();
+      try {
+        const audioBuf = await decodeAudioFile(file);
+        lastLoadedKickBuffer = audioBuf;
+        const p = parts[selectedPartId - 1];
+        p.audioBuffer = audioBuf;
+        p.hasCustomSample = true;
+        p.loopSample = false;
+        p.name = `KICK P${selectedPartId}`;
+        p.category = "USER KICK";
+        p.isMuted = false;
+        triggerPart(selectedPartId, 1.0);
+        isAssigningToPad = true;
+        displayNotice = "KICK GELADEN! TIPPE AUF PAD 1-16 ZUM VERLEGEN";
+      } catch (_) {
+        displayNotice = "AUDIO FORMAT FEHLER";
+      }
+      kickInput.value = "";
+      renderUI();
+    });
+
+    const songInput = document.getElementById("songFileInput");
+    songInput.addEventListener("change", async e => {
+      const file = e.target.files[0];
+      if (!file) return;
+      displayNotice = "LOADING SONG LOOP...";
+      renderUI();
+      try {
+        const audioBuf = await decodeAudioFile(file);
+        const songPart = parts[15]; // Part 16
+        songPart.audioBuffer = audioBuf;
+        songPart.hasCustomSample = true;
+        songPart.loopSample = true;
+        songPart.filterType = "OFF";
+        songPart.level = 0.9;
+        songPart.isMuted = false;
+        songPart.name = `SONG (${Math.max(1, Math.round(audioBuf.duration))}s)`;
+        songPart.category = "USER SONG";
+        if (!isPlaying) startSequencer();
+        else triggerPart(16, 1.0);
+        if (selectedPartId === 16) selectedPartId = 1;
+        displayNotice = "LIED LÄUFT AUF PT16! FÜGE KICKS AUF PAD 1-15 HINZU";
+      } catch (_) {
+        displayNotice = "SONG LOAD FEHLER";
+      }
+      songInput.value = "";
+      renderUI();
+    });
+
+    // --- BUTTON LISTENERS ---
+    document.getElementById("btnAddKick").onclick = () => kickInput.click();
+    document.getElementById("btnKickToPad").onclick = () => kickInput.click();
+    document.getElementById("btnSongLoop").onclick = () => songInput.click();
+    document.getElementById("btnAssignPad").onclick = () => {
+      isAssigningToPad = !isAssigningToPad;
+      displayNotice = isAssigningToPad ? "TIPPE AUF EINE TASTE (PAD 1-16) FÜR DEN KICK!" : null;
+      renderUI();
+    };
+    document.getElementById("btnPlay").onclick = () => {
+      if (isPlaying) stopSequencer();
+      else startSequencer();
+      renderUI();
+    };
+    document.getElementById("btnRec").onclick = () => {
+      isRecording = !isRecording;
+      renderUI();
+    };
+    document.getElementById("modeTrigger").onclick = () => { currentPadMode = "TRIGGER"; renderUI(); };
+    document.getElementById("modeSeq").onclick = () => { currentPadMode = "STEP_SEQ"; renderUI(); };
+    document.getElementById("modeSelect").onclick = () => { currentPadMode = "PART_SELECT"; renderUI(); };
+    document.getElementById("modeMute").onclick = () => { currentPadMode = "MUTE"; renderUI(); };
+
+    document.getElementById("btnPrevPt").onclick = () => {
+      selectedPartId = selectedPartId > 1 ? selectedPartId - 1 : 16;
+      renderUI();
+    };
+    document.getElementById("btnNextPt").onclick = () => {
+      selectedPartId = selectedPartId < 16 ? selectedPartId + 1 : 1;
+      renderUI();
+    };
+    document.getElementById("btnTScale").onclick = () => { touchpadMode = "TOUCH_SCALE"; renderUI(); };
+    document.getElementById("btnGArp").onclick = () => { touchpadMode = "GATE_ARP"; renderUI(); };
+    document.getElementById("btnMFx").onclick = () => { touchpadMode = "MASTER_FX"; renderUI(); };
+
+    document.getElementById("btnMenuPrev").onclick = () => {
+      menuPageIdx = (menuPageIdx - 1 + MENU_PAGES.length) % MENU_PAGES.length;
+      displayNotice = null;
+      renderUI();
+    };
+    document.getElementById("btnMenuNext").onclick = () => {
+      menuPageIdx = (menuPageIdx + 1) % MENU_PAGES.length;
+      displayNotice = null;
+      renderUI();
+    };
+
+    function stepValueEncoder(delta) {
+      const p = parts[selectedPartId - 1];
+      if (menuPageIdx === 0) {
+        p.oscIndex = (p.oscIndex + delta + OSC_PRESETS.length) % OSC_PRESETS.length;
+        p.name = OSC_PRESETS[p.oscIndex].name;
+        p.category = OSC_PRESETS[p.oscIndex].cat;
+        p.hasCustomSample = false;
+        p.audioBuffer = null;
+        triggerPart(selectedPartId, 0.85);
+      } else if (menuPageIdx === 1) {
+        bpm = Math.max(60, Math.min(240, bpm + delta * 2));
+      } else if (menuPageIdx === 2) {
+        swing = Math.max(50, Math.min(75, swing + delta));
+      } else if (menuPageIdx === 3) {
+        scaleIdx = (scaleIdx + delta + SCALES.length) % SCALES.length;
+      } else if (menuPageIdx === 4) {
+        const nextIdx = (IFX_TYPES.indexOf(p.insertFxType) + delta + IFX_TYPES.length) % IFX_TYPES.length;
+        p.insertFxType = IFX_TYPES[nextIdx];
+        p.insertFxEnabled = p.insertFxType !== "OFF";
+      }
+      renderUI();
+    }
+
+    document.getElementById("btnOscPrev").onclick = () => { menuPageIdx = 0; stepValueEncoder(-1); };
+    document.getElementById("btnOscNext").onclick = () => { menuPageIdx = 0; stepValueEncoder(1); };
+
+    // Large VALUE Encoder drag gesture
+    const valueKnobEl = document.getElementById("valueKnob");
+    let valStartY = 0;
+    let valAngle = 180;
+    valueKnobEl.addEventListener("pointerdown", e => {
+      valueKnobEl.setPointerCapture(e.pointerId);
+      valStartY = e.clientY;
+    });
+    valueKnobEl.addEventListener("pointermove", e => {
+      if (!valueKnobEl.hasPointerCapture(e.pointerId)) return;
+      const dy = valStartY - e.clientY;
+      if (Math.abs(dy) >= 14) {
+        const steps = dy > 0 ? 1 : -1;
+        valStartY = e.clientY;
+        valAngle = (valAngle + steps * 22) % 360;
+        document.getElementById("valueIndicator").style.transform = `translate(-50%, 0) rotate(${valAngle}deg)`;
+        stepValueEncoder(steps);
+      }
+    });
+
+    document.getElementById("btnFilterType").onclick = () => {
+      const p = parts[selectedPartId - 1];
+      const next = (FILTER_TYPES.indexOf(p.filterType) + 1) % FILTER_TYPES.length;
+      p.filterType = FILTER_TYPES[next];
+      renderUI();
+    };
+    document.getElementById("btnIfxToggle").onclick = () => {
+      const p = parts[selectedPartId - 1];
+      p.insertFxEnabled = !p.insertFxEnabled;
+      renderUI();
+    };
+    document.getElementById("btnPtMute").onclick = () => {
+      const p = parts[selectedPartId - 1];
+      p.isMuted = !p.isMuted;
+      if (p.isMuted) stopPartLoop(p);
+      renderUI();
+    };
+    document.getElementById("btnErase").onclick = () => {
+      parts[selectedPartId - 1].activeSteps.clear();
+      displayNotice = `PT ${selectedPartId} CLEARED`;
+      renderUI();
+    };
+
+    // --- KAOSS XY TOUCHPAD ---
+    const xyPad = document.getElementById("xyPad");
+    const xyCanvas = document.getElementById("xyCanvas");
+    function handleXY(e, isDown) {
+      const rect = xyPad.getBoundingClientRect();
+      const nx = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+      const ny = Math.max(0, Math.min(1, 1 - (e.clientY - rect.top) / rect.height));
+      xyTouch = { x: nx, y: ny };
+      const p = parts[selectedPartId - 1];
+      if (touchpadMode === "TOUCH_SCALE" || touchpadMode === "GATE_ARP") {
+        const notes = SCALES[scaleIdx].notes;
+        const semi = notes[Math.round(nx * (notes.length - 1))];
+        p.cutoff = 0.1 + ny * 0.85;
+        if (isDown) triggerPart(selectedPartId, 0.95, semi);
+        displayNotice = `${touchpadMode}: +${semi}ST CUT:${Math.round(ny * 127)}`;
+      } else {
+        if (masterFilter) masterFilter.frequency.value = 100 + nx * nx * 16000;
+        displayNotice = `MASTER FX: FLT ${Math.round(nx * 127)}`;
+      }
+      renderUI();
+    }
+    xyPad.addEventListener("pointerdown", e => {
+      xyPad.setPointerCapture(e.pointerId);
+      handleXY(e, true);
+    });
+    xyPad.addEventListener("pointermove", e => {
+      if (xyPad.hasPointerCapture(e.pointerId)) handleXY(e, false);
+    });
+    xyPad.addEventListener("pointerup", () => {
+      xyTouch = null;
+      if (masterFilter) masterFilter.frequency.value = 18000;
+      displayNotice = null;
+      renderUI();
+    });
+
+    // --- RENDER UI ---
+    function renderUI() {
+      const activePart = parts[selectedPartId - 1];
+      document.getElementById("stepHeader").textContent =
+        `KORG ELECTRIBE SAMPLER • STEP ${String(currentStep).padStart(2, "0")}/16`;
+
+      const oledTitle = document.getElementById("oledTitle");
+      oledTitle.textContent = `PT${String(activePart.id).padStart(2, "0")}: ${activePart.name}`;
+      oledTitle.className = activePart.hasCustomSample ? "custom-smp" : "";
+
+      document.getElementById("oledBpm").textContent = `${bpm} BPM ${isPlaying ? "►" : "❚❚"}`;
+
+      const oledSub = document.getElementById("oledSub");
+      const defaultSub = menuPageIdx === 0 ? `OSC: ${activePart.oscIndex + 1} ${activePart.name} (${activePart.filterType})`
+        : menuPageIdx === 1 ? `TEMPO: ${bpm} BPM [SWING: ${swing}%]`
+        : menuPageIdx === 2 ? `SWING: ${swing}%`
+        : menuPageIdx === 3 ? `SCALE: ${SCALES[scaleIdx].label}`
+        : `IFX: ${activePart.insertFxType} (${activePart.insertFxEnabled ? "ON" : "OFF"})`;
+      oledSub.textContent = displayNotice || defaultSub;
+      oledSub.className = displayNotice ? "oled-row2 notice" : "oled-row2";
+
+      document.getElementById("valueKnobLabel").textContent = MENU_PAGES[menuPageIdx];
+      document.getElementById("partFooter").textContent = `PART ${activePart.id}`;
+
+      // Knobs rotation
+      [...TOP_KNOBS, ...BOT_KNOBS].forEach(k => {
+        const val = activePart[k.key];
+        const deg = 30 + val * 300;
+        const ind = document.getElementById(`ind_${k.key}`);
+        if (ind) ind.style.transform = `translate(-50%, 0) rotate(${deg}deg)`;
+      });
+
+      // Buttons active state
+      document.getElementById("btnTScale").className = `hw-btn ${touchpadMode === "TOUCH_SCALE" ? "active-red" : ""}`;
+      document.getElementById("btnGArp").className = `hw-btn ${touchpadMode === "GATE_ARP" ? "active-blue" : ""}`;
+      document.getElementById("btnMFx").className = `hw-btn ${touchpadMode === "MASTER_FX" ? "active-amber" : ""}`;
+      document.getElementById("xyModeLabel").textContent = touchpadMode.replace("_", " ");
+
+      document.getElementById("btnAssignPad").className = `hw-btn ${isAssigningToPad ? "active-purple" : ""}`;
+      document.getElementById("btnAssignPad").textContent = isAssigningToPad ? "PAD WÄHLEN" : "-> TASTE";
+      document.getElementById("btnPtMute").className = `hw-btn ${activePart.isMuted ? "active-amber" : ""}`;
+      document.getElementById("btnFilterType").textContent = `FLT: ${activePart.filterType}`;
+      document.getElementById("btnIfxToggle").textContent = `IFX: ${activePart.insertFxEnabled ? activePart.insertFxType : "OFF"}`;
+      document.getElementById("btnIfxToggle").className = `hw-btn ${activePart.insertFxEnabled ? "active-amber" : ""}`;
+
+      document.getElementById("modeTrigger").className = `fn-btn ${currentPadMode === "TRIGGER" ? "active-red" : ""}`;
+      document.getElementById("modeSeq").className = `fn-btn ${currentPadMode === "STEP_SEQ" ? "active-seq" : ""}`;
+      document.getElementById("modeSelect").className = `fn-btn ${currentPadMode === "PART_SELECT" ? "active-blue" : ""}`;
+      document.getElementById("modeMute").className = `fn-btn ${currentPadMode === "MUTE" ? "active-amber" : ""}`;
+      document.getElementById("btnPlay").className = `fn-btn ${isPlaying ? "active-green" : ""}`;
+      document.getElementById("btnPlay").textContent = isPlaying ? "❚❚ STOP" : "► PLAY";
+      document.getElementById("btnRec").className = `fn-btn ${isRecording ? "active-rec" : ""}`;
+      document.getElementById("btnKickToPad").className = `fn-btn ${isAssigningToPad ? "active-purple" : ""}`;
+      document.getElementById("btnSongLoop").className = `fn-btn ${parts[15].hasCustomSample ? "active-green" : ""}`;
+
+      // 16 Pads
+      for (let i = 1; i <= 16; i++) {
+        const p = parts[i - 1];
+        const padEl = document.getElementById(`pad_${i}`);
+        document.getElementById(`padsub_${i}`).textContent = p.name.slice(0, 7);
+        let color = "#282828";
+        let lit = false;
+        if (isAssigningToPad) {
+          color = "#9333EA";
+          lit = true;
+        } else if (currentPadMode === "TRIGGER") {
+          const isStepHit = isPlaying && p.activeSteps.has(currentStep) && !p.isMuted;
+          if (isStepHit) { color = "#FF5555"; lit = true; }
+          else if (i === selectedPartId) { color = "#C01525"; lit = true; }
+          else if (p.hasCustomSample && p.loopSample) { color = "#059669"; lit = true; }
+          else if (p.hasCustomSample) { color = "#7C3AED"; lit = true; }
+        } else if (currentPadMode === "STEP_SEQ") {
+          const isStep = activePart.activeSteps.has(i);
+          const isPlay = isPlaying && currentStep === i;
+          if (isStep && isPlay) { color = "#FFFFFF"; lit = true; }
+          else if (isPlay) { color = "#FF7777"; lit = true; }
+          else if (isStep) { color = "#D61828"; lit = true; }
+        } else if (currentPadMode === "PART_SELECT") {
+          if (i === selectedPartId) { color = "#0084D1"; lit = true; }
+        } else if (currentPadMode === "MUTE") {
+          if (!p.isMuted) { color = "#D97706"; lit = true; }
+        }
+        padEl.style.background = color;
+        padEl.style.borderColor = lit ? "rgba(255,255,255,0.65)" : "#141414";
+        padEl.className = `rubber-pad ${lit ? "lit" : ""}`;
+      }
+
+      // Draw XY Pad
+      const w = xyCanvas.width = xyPad.clientWidth;
+      const h = xyCanvas.height = xyPad.clientHeight;
+      const ctx = xyCanvas.getContext("2d");
+      ctx.clearRect(0, 0, w, h);
+      const pos = xyTouch || { x: activePart.cutoff, y: activePart.resonance };
+      const px = pos.x * w;
+      const py = (1 - pos.y) * h;
+      ctx.strokeStyle = "rgba(255, 59, 48, 0.45)";
+      ctx.beginPath();
+      ctx.moveTo(0, py); ctx.lineTo(w, py);
+      ctx.moveTo(px, 0); ctx.lineTo(px, h);
+      ctx.stroke();
+      ctx.fillStyle = "#FF3B30";
+      ctx.beginPath();
+      ctx.arc(px, py, 6, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    window.addEventListener("resize", renderUI);
+    renderUI();
+  </script>
+</body>
+</html>

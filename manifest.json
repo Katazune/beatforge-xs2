@@ -1,0 +1,16 @@
+{
+  "name": "KORG Electribe Sampler ES2",
+  "short_name": "ES2 Sampler",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#111111",
+  "theme_color": "#820E17",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='36' fill='%23820E17'/><rect x='14' y='14' width='164' height='164' rx='26' fill='none' stroke='%23D43845' stroke-width='4'/><text x='96' y='88' text-anchor='middle' fill='white' font-family='sans-serif' font-weight='900' font-size='44'>KORG</text><text x='96' y='136' text-anchor='middle' fill='%23FFD166' font-family='monospace' font-weight='bold' font-size='32'>ES2</text></svg>",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    }
+  ]
+}
