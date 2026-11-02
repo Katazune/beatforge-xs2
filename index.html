@@ -564,7 +564,8 @@
         <div class="fn-btn" id="btnSongLoop">+ SONG LOOP</div>
         <div class="fn-btn" id="btnFlMidi" title="FL Studio Live MIDI (WebMIDI / loopMIDI)">🎹 FL MIDI</div>
         <div class="fn-btn" id="btnFlExportMid" title="Exportiert das aktuelle Pattern als .MID Datei für die FL Studio Piano Roll">📤 FL .MID</div>
-        <div class="fn-btn" id="btnFlExportWav" title="Exportiert den Sound oder 16-Step-Loop als .WAV Datei für die FL Studio Playlist">💿 FL .WAV</div>
+        <div class="fn-btn" id="btnFlExportWav" title="Exportiert den Sound des Pads als .WAV Datei für die FL Studio Playlist">💿 FL .WAV</div>
+        <div class="fn-btn" id="btnTrackRec" title="Nimmt deinen kompletten Live-Track (alle 16 Spuren + Effekte) als fertiges .WAV Lied auf">🔴 LIED REC</div>
       </div>
       <div class="part-indicator" id="partFooter">PART 1</div>
     </div>
@@ -610,7 +611,15 @@
       { name: "EMX HOOVER", cat: "BLECHTRIBE" },
       { name: "EMX SUPERSAW", cat: "BLECHTRIBE" },
       { name: "EMX HARD SNARE", cat: "BLECHTRIBE" },
-      { name: "EMX FM DONK", cat: "BLECHTRIBE" }
+      { name: "EMX FM DONK", cat: "BLECHTRIBE" },
+      { name: "TEKK TOK KICK", cat: "HARDTEKK" },
+      { name: "TEKK ZAAG KICK", cat: "HARDTEKK" },
+      { name: "SCHRANZ CRUNCH", cat: "HARDTEKK" },
+      { name: "UPTEMPO PIEP BD", cat: "HARDTEKK" },
+      { name: "TEKK OFFB BASS", cat: "HARDTEKK" },
+      { name: "RAVE HOOVER STAB", cat: "HARDTEKK" },
+      { name: "SCHRANZ RIDE/HAT", cat: "HARDTEKK" },
+      { name: "TEKK ACID SCREECH", cat: "HARDTEKK" }
     ];
 
     const FILTER_TYPES = ["LPF", "HPF", "BPF", "OFF"];
@@ -684,6 +693,9 @@
     const E2_DRUM_TYPES = [
       { id: "KICK_909", label: "909 PUNCH KICK", short: "MY 909 BD" },
       { id: "KICK_HARDTEK", label: "HARDTEK / GABBER", short: "HARD KICK" },
+      { id: "KICK_TEKK_TOK", label: "OSTBLOCK TOK KICK", short: "TOK KICK" },
+      { id: "KICK_ZAAG", label: "UPTEMPO ZAAG KICK", short: "ZAAG KICK" },
+      { id: "KICK_SCHRANZ", label: "SCHRANZ CRUNCH BD", short: "SCHRANZ BD" },
       { id: "KICK_BLECHTRIBE", label: "EMX BLECHTRIBE BD", short: "EMX KICK" },
       { id: "KICK_808", label: "808 SUB BOOM", short: "MY 808 BD" },
       { id: "SNARE_ANALOG", label: "ANALOG SNARE", short: "MY SNARE" },
@@ -691,6 +703,7 @@
       { id: "CLAP_FAT", label: "CLUB CLAP", short: "MY CLAP" },
       { id: "HIHAT_METAL", label: "METAL HI-HAT", short: "MY HIHAT" },
       { id: "BASS_DONK", label: "FM DONK BASS", short: "MY DONK" },
+      { id: "BASS_REVERSE", label: "TEKK REVERSE BASS", short: "REV BASS" },
       { id: "ACID_SCREAM", label: "303 ACID SCREAM", short: "303 ACID" }
     ];
     let e2TypeIdx = 0;
@@ -707,7 +720,7 @@
       ensureAudio();
       const sr = audioCtx.sampleRate;
       const type = E2_DRUM_TYPES[e2TypeIdx].id;
-      const dur = type === "KICK_808" ? (0.28 + e2Params.decay * 0.85) : (0.16 + e2Params.decay * 0.50);
+      const dur = type === "KICK_808" ? (0.28 + e2Params.decay * 0.85) : (0.18 + e2Params.decay * 0.54);
       const len = Math.floor(sr * dur);
       const buf = audioCtx.createBuffer(1, len, sr);
       const data = buf.getChannelData(0);
@@ -718,15 +731,33 @@
       for (let i = 0; i < len; i++) {
         const t = i * dt;
         const prog = i / len;
-        const ampEnv = Math.pow(1 - prog, 1.6 + (1 - e2Params.decay) * 1.8);
+        const ampEnv = Math.pow(1 - prog, 1.5 + (1 - e2Params.decay) * 1.8);
         let raw = 0;
         if (type.startsWith("KICK")) {
-          const baseF = type === "KICK_808" ? (34 + e2Params.tune * 32) : (44 + e2Params.tune * 46);
-          const drop = (80 + e2Params.sweep * 340) * Math.exp(-t * (18 + (1 - e2Params.sweep) * 26));
+          const baseF = type === "KICK_808" ? (34 + e2Params.tune * 32)
+            : type === "KICK_TEKK_TOK" ? (48 + e2Params.tune * 42)
+            : type === "KICK_ZAAG" ? (45 + e2Params.tune * 40)
+            : (44 + e2Params.tune * 46);
+          const dropRate = type === "KICK_TEKK_TOK" ? 24 : (18 + (1 - e2Params.sweep) * 26);
+          const dropAmt = (type === "KICK_TEKK_TOK" ? 210 : 80) + e2Params.sweep * 360;
+          const drop = dropAmt * Math.exp(-t * dropRate);
           phase += 2 * Math.PI * (baseF + drop) * dt;
           let body = Math.sin(phase);
-          if (type === "KICK_HARDTEK") body = Math.tanh(body * (1.8 + e2Params.snappy * 3));
-          else if (type === "KICK_BLECHTRIBE") body = Math.tanh((body + Math.sin(phase * 2) * (0.28 + e2Params.snappy * 0.55)) * 2.2);
+          if (type === "KICK_HARDTEK") {
+            body = Math.tanh(body * (2.2 + e2Params.snappy * 3.5));
+          } else if (type === "KICK_TEKK_TOK") {
+            const tokHarm = Math.sin(phase * 2.6) * (0.55 + e2Params.click * 0.65) * Math.exp(-t * 28);
+            body = Math.tanh((body * 1.4 + tokHarm) * (2.8 + e2Params.snappy * 3.2));
+          } else if (type === "KICK_ZAAG") {
+            const normP = (phase / (2 * Math.PI)) % 1;
+            const saw = normP * 2 - 1;
+            body = Math.tanh((body * 0.85 + saw * (0.65 + e2Params.snappy * 0.8)) * (3.2 + e2Params.drive * 4.5));
+          } else if (type === "KICK_SCHRANZ") {
+            const grit = (Math.random() * 2 - 1) * (0.35 + e2Params.snappy * 0.65) * Math.exp(-t * 14);
+            body = Math.tanh((body * 1.6 + Math.sin(phase * 1.5) * 0.4 + grit) * 3.4);
+          } else if (type === "KICK_BLECHTRIBE") {
+            body = Math.tanh((body + Math.sin(phase * 2) * (0.28 + e2Params.snappy * 0.55)) * 2.2);
+          }
           const clickEnv = Math.exp(-t * 140);
           const trans = (Math.sin(phase * 3.5) * 0.6 + (Math.random() * 2 - 1) * 0.4) * clickEnv * e2Params.click * 1.4;
           raw = (body + trans) * ampEnv;
@@ -746,6 +777,13 @@
           phase += 2 * Math.PI * (310 + e2Params.tune * 420) * dt;
           const sq = (Math.sin(phase) > 0 ? 0.3 : -0.3) + (Math.sin(phase * 1.44) > 0 ? 0.3 : -0.3);
           raw = (sq + (Math.random() * 2 - 1) * (0.4 + e2Params.snappy * 0.6)) * ampEnv;
+        } else if (type === "BASS_REVERSE") {
+          const baseF = 46 + e2Params.tune * 65;
+          const revEnv = Math.sin(Math.min(1, prog * 1.35) * Math.PI);
+          phase += 2 * Math.PI * (baseF + e2Params.sweep * 45 * revEnv) * dt;
+          const normP = (phase / (2 * Math.PI)) % 1;
+          const saw = normP * 2 - 1;
+          raw = Math.tanh((Math.sin(phase) * 0.8 + saw * (0.45 + e2Params.snappy * 0.6)) * 2.2) * revEnv;
         } else {
           const baseF = 45 + e2Params.tune * 95;
           const ratio = 2 + Math.round(e2Params.sweep * 4);
@@ -792,6 +830,10 @@
       }
     }
 
+    let isRecordingMasterTrack = false;
+    let masterRecChunks = [];
+    let masterRecNode = null;
+
     function ensureAudio() {
       if (!audioCtx) {
         const AC = window.AudioContext || window.webkitAudioContext;
@@ -814,6 +856,16 @@
         tubeShaper.connect(masterComp);
         masterComp.connect(masterGain);
         masterGain.connect(audioCtx.destination);
+
+        // Live Master Track Recorder tap (16-bit WAV capture of full master output)
+        masterRecNode = audioCtx.createScriptProcessor(4096, 1, 1);
+        masterRecNode.onaudioprocess = e => {
+          if (!isRecordingMasterTrack) return;
+          const input = e.inputBuffer.getChannelData(0);
+          masterRecChunks.push(new Float32Array(input));
+        };
+        masterGain.connect(masterRecNode);
+        masterRecNode.connect(audioCtx.destination);
       }
       if (audioCtx.state === "suspended") {
         audioCtx.resume();
@@ -824,6 +876,10 @@
       if (part.activeSource) {
         try { part.activeSource.stop(); } catch (_) {}
         part.activeSource = null;
+      }
+      if (part.activeGain) {
+        try { part.activeGain.disconnect(); } catch (_) {}
+        part.activeGain = null;
       }
     }
 
@@ -872,6 +928,7 @@
         const startOffset = part.loopSample ? 0 : (part.oscEdit * 0.7 * part.audioBuffer.duration);
         src.start(now, startOffset);
         part.activeSource = src;
+        part.activeGain = gain;
         src.onended = () => {
           if (part.activeSource === src) part.activeSource = null;
         };
@@ -880,6 +937,7 @@
 
       // Built-in Synth & Drum Engine (26 Presets incl. BLECHTRIBE EMX Engine)
       const gain = audioCtx.createGain();
+      part.activeGain = gain;
       const flt = audioCtx.createBiquadFilter();
       flt.type = part.filterType === "HPF" ? "highpass" : part.filterType === "BPF" ? "bandpass" : "lowpass";
       const baseCutFreq = 80 + part.cutoff * part.cutoff * 10500;
@@ -898,7 +956,49 @@
       gain.connect(masterFilter);
 
       const oscIdx = part.oscIndex;
-      if (oscIdx === 0 || oscIdx === 19 || oscIdx === 20 || oscIdx === 6 || oscIdx === 7) {
+      if (oscIdx >= 26 && oscIdx <= 29) {
+        // HARDTEKK KICKS: 26 = TEKK TOK KICK, 27 = TEKK ZAAG KICK, 28 = SCHRANZ CRUNCH, 29 = UPTEMPO PIEP BD
+        const sr = audioCtx.sampleRate;
+        const kickDur = Math.max(0.18, Math.min(0.65, decaySec * 1.05));
+        const len = Math.floor(sr * kickDur);
+        const kBuf = audioCtx.createBuffer(1, len, sr);
+        const kData = kBuf.getChannelData(0);
+        let ph = 0, ph2 = 0;
+        const dt = 1 / sr;
+        const edit = part.oscEdit;
+        for (let i = 0; i < len; i++) {
+          const t = i * dt;
+          const env = Math.pow(1 - i / len, 1.35);
+          const baseF = (oscIdx === 26 ? 50 : oscIdx === 27 ? 45 : oscIdx === 28 ? 47 : 48) * pitchMul;
+          const drop = (oscIdx === 26 ? 340 : oscIdx === 29 ? 520 : 250) * Math.exp(-t * (oscIdx === 26 ? 26 : 19)) * pitchMul;
+          ph += 2 * Math.PI * (baseF + drop) * dt;
+          let s = Math.sin(ph);
+          if (oscIdx === 26) {
+            // Ostblock Tok Kick: Dry woody high-mid knock + clipped sub
+            const tok = Math.sin(ph * 2.75) * (0.75 + edit * 0.6) * Math.exp(-t * 30);
+            s = Math.tanh((s * 1.5 + tok) * (3.2 + edit * 3.5));
+          } else if (oscIdx === 27) {
+            // Uptempo Zaag Kick: Sawtooth crunch + sub
+            const saw = ((ph / (2 * Math.PI)) % 1) * 2 - 1;
+            s = Math.tanh((s * 0.9 + saw * (0.75 + edit * 0.9)) * (4.0 + edit * 4.5));
+          } else if (oscIdx === 28) {
+            // Schranz Crunch Kick: Industrial noise-modulated distortion
+            const crunch = (Math.random() * 2 - 1) * (0.42 + edit * 0.6) * Math.exp(-t * 12);
+            s = Math.tanh((s * 1.7 + Math.sin(ph * 1.5) * 0.45 + crunch) * (3.6 + edit * 3.8));
+          } else {
+            // Uptempo Piep Kick: High resonant screech harmonic + hard sub
+            ph2 += 2 * Math.PI * (760 + edit * 680) * pitchMul * dt;
+            const piep = Math.sin(ph2) * (0.55 + edit * 0.45) * Math.exp(-t * 9);
+            s = Math.tanh((s * 1.5 + piep) * 3.5);
+          }
+          kData[i] = s * env;
+        }
+        const kSrc = audioCtx.createBufferSource();
+        kSrc.buffer = kBuf;
+        kSrc.connect(flt);
+        kSrc.start(now);
+        part.activeSource = kSrc;
+      } else if (oscIdx === 0 || oscIdx === 19 || oscIdx === 20 || oscIdx === 6 || oscIdx === 7) {
         // 909 Kick (0), Subwoofer 808 (19), EMX Tribe Kick (20), Low/Hi Toms (6, 7)
         const osc = audioCtx.createOscillator();
         osc.type = oscIdx === 20 ? "triangle" : "sine";
@@ -919,12 +1019,15 @@
           sub.start(now);
           sub.stop(now + decaySec);
         }
-      } else if (oscIdx === 1 || oscIdx === 2 || oscIdx === 3 || oscIdx === 4 || oscIdx === 5 || oscIdx === 8 || oscIdx === 9 || oscIdx === 18 || oscIdx === 24) {
-        // Snare (1), Clap (2), Hats (3,4), Rim (5), Shaker (8), Crash (9), Riser (18), EMX Hard Snare (24)
+      } else if (oscIdx === 1 || oscIdx === 2 || oscIdx === 3 || oscIdx === 4 || oscIdx === 5 || oscIdx === 8 || oscIdx === 9 || oscIdx === 18 || oscIdx === 24 || oscIdx === 32) {
+        // Snare (1), Clap (2), Hats (3,4), Rim (5), Shaker (8), Crash (9), Riser (18), EMX Hard Snare (24), Schranz Ride/Hat (32)
         const bufSize = Math.floor(audioCtx.sampleRate * decaySec);
         const noiseBuf = audioCtx.createBuffer(1, bufSize, audioCtx.sampleRate);
         const data = noiseBuf.getChannelData(0);
-        for (let i = 0; i < bufSize; i++) data[i] = Math.random() * 2 - 1;
+        for (let i = 0; i < bufSize; i++) {
+          const n = Math.random() * 2 - 1;
+          data[i] = oscIdx === 32 ? Math.tanh((n + Math.sin(i * 0.42) * 0.8) * 2.6) : n;
+        }
         const noise = audioCtx.createBufferSource();
         noise.buffer = noiseBuf;
         noise.connect(flt);
@@ -938,10 +1041,10 @@
           body.start(now);
           body.stop(now + decaySec);
         }
-      } else if (oscIdx === 12 || oscIdx === 13 || oscIdx === 16 || oscIdx === 17 || oscIdx === 22 || oscIdx === 23) {
-        // Dual Saw (12), Minor Chord (13), Orch Hit (16), Choir (17), EMX Hoover (22), EMX Supersaw (23)
-        const baseFreq = (oscIdx === 22 ? 110 : 130.81) * pitchMul;
-        const ratios = oscIdx === 13 || oscIdx === 16 ? [1, 1.1892, 1.4983] : [0.992, 1.008, 1.5];
+      } else if (oscIdx === 12 || oscIdx === 13 || oscIdx === 16 || oscIdx === 17 || oscIdx === 22 || oscIdx === 23 || oscIdx === 31) {
+        // Dual Saw (12), Minor Chord (13), Orch Hit (16), Choir (17), EMX Hoover (22), EMX Supersaw (23), Rave Hoover Stab (31)
+        const baseFreq = (oscIdx === 22 ? 110 : oscIdx === 31 ? 146.83 : 130.81) * pitchMul;
+        const ratios = oscIdx === 13 || oscIdx === 16 || oscIdx === 31 ? [1, 1.1892, 1.4983, 2.0] : [0.992, 1.008, 1.5];
         ratios.forEach(r => {
           const osc = audioCtx.createOscillator();
           osc.type = oscIdx === 17 ? "triangle" : "sawtooth";
@@ -951,16 +1054,19 @@
           osc.stop(now + decaySec);
         });
       } else {
-        // Acid Saw 303 (10), Sub Bass (11), Zap Laser (14), EMX Acid 303 (21), EMX FM Donk (25)
+        // Acid Saw 303 (10), Sub Bass (11), Zap Laser (14), EMX Acid 303 (21), EMX FM Donk (25), Tekk Offb Bass (30), Tekk Acid Screech (33)
         const osc = audioCtx.createOscillator();
         osc.type = (oscIdx === 11 || oscIdx === 25) ? "sine" : "sawtooth";
-        const baseFreq = (oscIdx === 11 ? 65.41 : oscIdx === 10 || oscIdx === 21 ? 82.41 : oscIdx === 25 ? 98 : 220) * pitchMul;
+        const baseFreq = (oscIdx === 11 ? 65.41 : oscIdx === 30 ? 58.27 : oscIdx === 10 || oscIdx === 21 ? 82.41 : oscIdx === 33 ? 196.0 : oscIdx === 25 ? 98 : 220) * pitchMul;
         if (oscIdx === 14) {
           osc.frequency.setValueAtTime(980 * pitchMul, now);
           osc.frequency.exponentialRampToValueAtTime(55 * pitchMul, now + 0.14);
-        } else if (oscIdx === 25) {
-          osc.frequency.setValueAtTime(baseFreq * 2.8, now);
-          osc.frequency.exponentialRampToValueAtTime(baseFreq, now + 0.055);
+        } else if (oscIdx === 25 || oscIdx === 30) {
+          osc.frequency.setValueAtTime(baseFreq * (oscIdx === 30 ? 3.4 : 2.8), now);
+          osc.frequency.exponentialRampToValueAtTime(baseFreq, now + (oscIdx === 30 ? 0.075 : 0.055));
+        } else if (oscIdx === 33) {
+          osc.frequency.setValueAtTime(baseFreq * 1.5, now);
+          osc.frequency.exponentialRampToValueAtTime(baseFreq, now + 0.09);
         } else {
           osc.frequency.setValueAtTime(baseFreq, now);
         }
@@ -1199,18 +1305,23 @@
       }
 
       if (currentPadMode === "TRIGGER") {
+        const wasAlreadySelected = (selectedPartId === index);
         selectedPartId = index;
-        // Wenn auf diesem Pad (z. B. Pad 16) gerade ein Sample / Song-Loop läuft: per Klick sofort AUSSCHALTEN (Toggle Off)!
-        if (part.hasCustomSample && part.activeSource && (index === 16 || part.loopSample || (part.audioBuffer && part.audioBuffer.duration > 0.8))) {
+        // Im TRIGGER-Modus: Wenn ein Sample/Loop gerade läuft ODER das bereits ausgewählte Pad im Sequencer aktiv ist -> per Klick AUSSCHALTEN!
+        const isCurrentlyRunning = (part.hasCustomSample && part.activeSource) ||
+          (wasAlreadySelected && !part.isMuted && isPlaying && (part.activeSteps.size > 0 || part.loopSample));
+        if (isCurrentlyRunning) {
           stopPartLoop(part);
-          if (part.loopSample || index === 16) part.isMuted = true;
-          displayNotice = `PAD ${index} (${part.name}): SAMPLE AUSGESCHALTET! (NOCHMAL TIPPEN = AN)`;
+          if (part.loopSample || index === 16 || (isPlaying && part.activeSteps.size > 0)) {
+            part.isMuted = true;
+          }
+          displayNotice = `PAD ${index} (${part.name}): TRIGGER AUSGESCHALTET! (NOCHMAL TIPPEN = AN)`;
           renderUI();
           return;
         }
         if (part.isMuted) {
           part.isMuted = false;
-          displayNotice = `PAD ${index} (${part.name}): SAMPLE WIEDER AN!`;
+          displayNotice = `PAD ${index} (${part.name}): TRIGGER WIEDER AN!`;
         } else {
           displayNotice = null;
         }
@@ -1653,10 +1764,11 @@
       p.activeSteps.clear();
       p.accentSteps.clear();
       const notes = SCALES[scaleIdx].notes;
-      if (selectedPartId === 1 || p.name.includes("BD") || p.name.includes("KICK")) {
-        [1, 5, 9, 13].forEach(s => p.activeSteps.add(s));
-        [4, 8, 11, 15, 16].forEach(s => { if (Math.random() < 0.35) p.activeSteps.add(s); });
-        p.accentSteps.add(1); p.accentSteps.add(9);
+      if (p.oscIndex === 30 || p.name.includes("OFFB")) {
+        [3, 7, 11, 15].forEach(s => { p.activeSteps.add(s); p.accentSteps.add(s); });
+      } else if (selectedPartId === 1 || p.name.includes("BD") || p.name.includes("KICK") || p.name.includes("SCHRANZ")) {
+        [1, 5, 9, 13].forEach(s => { p.activeSteps.add(s); p.accentSteps.add(s); });
+        [4, 8, 12, 15, 16].forEach(s => { if (Math.random() < 0.42) p.activeSteps.add(s); });
       } else if (isSynth) {
         p.motionSeqMode = "PLAY";
         for (let s = 1; s <= 16; s++) {
@@ -1830,6 +1942,11 @@
       if (flBtn) {
         flBtn.className = `fn-btn ${flMidiEnabled ? "active-amber" : ""}`;
         flBtn.textContent = flMidiEnabled ? `🎹 FL:${flMidiOutName.slice(0, 8)}` : "🎹 FL MIDI";
+      }
+      const trkRecBtn = document.getElementById("btnTrackRec");
+      if (trkRecBtn) {
+        trkRecBtn.className = `fn-btn ${isRecordingMasterTrack ? "active-rec" : ""}`;
+        trkRecBtn.textContent = isRecordingMasterTrack ? "⏹ SAVE .WAV" : "🔴 LIED REC";
       }
 
       // 16 Pads
@@ -2197,6 +2314,46 @@
       renderUI();
     }
     document.getElementById("btnFlExportWav").onclick = exportFlStudioWavFile;
+
+    // --- LIVE MASTER TRACK .WAV RECORDER (RECORDS FULL LIVE PERFORMANCE TO DOWNLOADS) ---
+    document.getElementById("btnTrackRec").onclick = () => {
+      ensureAudio();
+      if (!isRecordingMasterTrack) {
+        masterRecChunks = [];
+        isRecordingMasterTrack = true;
+        if (!isPlaying) startSequencer();
+        displayNotice = "🔴 LIVE-LIED AUFNAHME LÄUFT! (KLICKE '⏹ SAVE .WAV' ZUM SPEICHERN)";
+        renderUI();
+      } else {
+        isRecordingMasterTrack = false;
+        const totalLen = masterRecChunks.reduce((acc, c) => acc + c.length, 0);
+        if (totalLen === 0) {
+          displayNotice = "KEIN AUDIO AUFGENOMMEN";
+          renderUI();
+          return;
+        }
+        const fullBuf = audioCtx.createBuffer(1, totalLen, audioCtx.sampleRate);
+        const dst = fullBuf.getChannelData(0);
+        let pos = 0;
+        for (const chunk of masterRecChunks) {
+          dst.set(chunk, pos);
+          pos += chunk.length;
+        }
+        masterRecChunks = [];
+        const wavBlob = encodeAudioBufferToWav(fullBuf);
+        const url = URL.createObjectURL(wavBlob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `BeatForge_Hardtekk_Track_${bpm}BPM.wav`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 4000);
+        const sec = Math.max(1, Math.round(totalLen / audioCtx.sampleRate));
+        displayNotice = `✅ LIED GESPEICHERT (${sec}s .WAV IN DEINEM DOWNLOADS-ORDNER)!`;
+        renderUI();
+      }
+    };
 
     // --- WINDOWS 10/11 NATIVE DESKTOP APP INSTALLER (PWA) ---
     let deferredInstallPrompt = null;

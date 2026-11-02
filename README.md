@@ -9,13 +9,16 @@
 ### 🔴 1. BeatForge XS-2 Modus (Roter Sampler-Modus)
 * **Durchlaufende Lieder & Loops (`+ SONG` / `+ SONG LOOP`):** Importiere komplette Songs oder Loops (`.wav`, `.mp3`, `.m4a`, `.ogg` bis 3 Minuten), die nahtlos im Hintergrund durchlaufen, während du live eigene Kicks, Snares und Hi-Hats auf den Pads 1–15 dazuspielst oder im Sequencer programmierst.
 * **Eigene Kicks & One-Shot Samples (`+ KICK` / `-> TASTE`):** Lade eigene Kick- oder Drum-Samples direkt vom Gerät (oder ziehe sie unter Windows per **Drag & Drop** auf ein Pad) und lege sie frei auf jede beliebige der **16 Tasten (Pads 1–16)**.
-* **26 integrierte Drum-, Synth- & Blechtribe-Oszillatoren:** Von `BD 909 PUNCH`, `SUBWOOFER 808`, `EMX TRIBE KICK`, `SD ANALOG`, `EMX HARD SNARE`, `HAND CLAP`, `CLOSED/OPEN HH` bis hin zu `ACID SAW 303`, `EMX ACID 303`, `EMX HOOVER`, `EMX SUPERSAW`, `EMX FM DONK`, `PCM ORCH HIT`, `PCM CHOIR AAH`, `SUB BASS` und `DUAL SAW LEAD`.
+* **34 integrierte Drum-, Hardtekk-, Synth- & Blechtribe-Oszillatoren:** Von `TEKK TOK KICK`, `TEKK ZAAG KICK`, `SCHRANZ CRUNCH`, `UPTEMPO PIEP BD`, `TEKK OFFB BASS`, `RAVE HOOVER STAB`, `SCHRANZ RIDE/HAT` und `TEKK ACID SCREECH` bis zu `BD 909 PUNCH`, `SUBWOOFER 808`, `EMX TRIBE KICK`, `SD ANALOG`, `EMX HARD SNARE`, `ACID SAW 303`, `EMX ACID 303`, `EMX HOOVER`, `EMX SUPERSAW`, `EMX FM DONK` und `SUB BASS`.
 
 ---
 
 ### 🔵 2. BeatForge XT-2 Modus (Blauer Drum- & Synth-Creator)
 Per Klick auf **`XT2 BLAU`** (oder Taste **`[B]`** auf Windows) wechselt das Gehäuse in den blauen Synthesizer-Modus, in dem du eigene Kicks, Snares, Claps, Hi-Hats und Acid-Bässe von Grund auf selbst bauen kannst:
-* **10 Synthese-Modelle (`◄ DRUM TYP ►`):**
+* **14 Synthese-Modelle (`◄ DRUM TYP ►`):**
+  * `OSTBLOCK TOK KICK` – Trockener, harter Ostblock-Hardtekk „Tok“-Kick mit druckvollem Sub
+  * `UPTEMPO ZAAG KICK` – Brachialer Uptempo-/Hardtekk-Zaag-Kick mit Sägezahn-Crunch
+  * `SCHRANZ CRUNCH BD` – Industrieller, hart übersteuerter Schranz-Kick
   * `EMX BLECHTRIBE BD` – Druckvoller Metall-Tribe-Kick mit 2.-Harmonischer Röhrenfaltung
   * `909 PUNCH KICK` – Klassischer Techno-/House-Kick
   * `HARDTEK / GABBER` – Brachialer Tekno-/Hardstyle-Kick mit Oberton-Verzerrung
@@ -25,6 +28,7 @@ Per Klick auf **`XT2 BLAU`** (oder Taste **`[B]`** auf Windows) wechselt das Geh
   * `CLUB CLAP` – Mehrfach geschichteter Club-Clap
   * `METAL HI-HAT` – Metallische Synthesizer-Hi-Hat
   * `FM DONK BASS` – FM-/Donk-Bass
+  * `TEKK REVERSE BASS` – Aufsteigender Hardtekk Offbeat-/Reverse-Bass
   * `303 ACID SCREAM` – Kreischender 303-Acid-Synth mit Resonanz-Envelope
 * **Echtzeit-Synthese-Regler:**
   * `TUNE / SUB` (Grundfrequenz & Subbass)
@@ -50,16 +54,19 @@ Alle Kult-Funktionen aus **BLECHTRIBE v1.4.0** sowie den Röhren-Electribes:
 
 ---
 
-### 🎹 4. FL Studio Integration (`🎹 FL MIDI`, `📤 FL .MID`, `💿 FL .WAV`)
-Direkte Anbindung an **FL Studio** auf Windows (WebMIDI / *loopMIDI*) und Android (USB-MIDI):
+### 🎹 4. Live-Track-Aufnahme (`🔴 LIED REC`) & FL Studio Integration (`🎹 FL MIDI`, `📤 FL .MID`, `💿 FL .WAV`)
+Speichere deine fertigen Hardtekk-Lieder, Patterns und Sounds direkt im **`Downloads`-Ordner** oder verbinde dich live mit **FL Studio** auf Windows (WebMIDI / *loopMIDI*) und Android (USB-MIDI):
+* **`🔴 LIED REC` / `⏹ SAVE .WAV` (Live-Gesamttrack als `.wav` aufnehmen):**
+  * Ein Klick auf **`🔴 LIED REC`** startet die Echtzeit-Master-Aufnahme deiner kompletten Live-Performance (alle 16 Spuren + Röhren-Verzerrung + Filter-Sweeps + Mute-Drops).
+  * Beim Klick auf **`⏹ SAVE .WAV`** wird dein fertiger Song sofort als **16-Bit 44.1 kHz `.wav`-Datei** (`BeatForge_Hardtekk_Track_<BPM>BPM.wav`) in deinem **`Downloads`-Ordner** gespeichert.
 * **`🎹 FL MIDI` (Live MIDI Out / In / Clock Sync):**
   * **Live-Noten:** Alle 16 Pads, der Step-Sequencer, der **`🎲 DICE`-Generator**, **`ROLL`-Substeps** und das **`KEYB`-Keyboard** senden Echtzeit-MIDI-Noten an FL Studio (Drums auf MIDI-Kanal 10 für *FPC* / Channel Rack, Synths/303 chromatisch auf Kanal 1–16 für die *Piano Roll*).
   * **Live-Drehregler (`Link to controller`):** Alle 10 Drehregler (`CUTOFF` CC 74, `RESONANCE` CC 71, `PITCH` CC 16, `DECAY` CC 72, `ATTACK` CC 73, `LEVEL` CC 7 usw.) senden MIDI-CC-Befehle an FL Studio.
   * **MIDI Clock Sync:** Startet/stoppt synchron mit FL Studio und übernimmt automatisch das FL-Studio-Tempo.
 * **`📤 FL .MID` (1-Klick Piano-Roll-Export):**
-  * Exportiert das aktuelle Pattern (inkl. `🎲 DICE`-Melodien, Accents, 3x-Ratchet-Rolls, Pitch-Motion & Cutoff-Automation) als `.mid`-Datei zum direkten Reinziehen in die **FL Studio Piano Roll**.
-* **`💿 FL .WAV` (1-Klick Audio-Export):**
-  * Exportiert den selbstgebauten **XT-2 / BLECHTRIBE Sound** oder Sample-Slot sofort als **16-Bit 44.1 kHz `.wav`-Datei** für die **FL Studio Playlist** oder den Sampler.
+  * Exportiert das aktuelle Pattern (inkl. `🎲 DICE`-Melodien, Accents, 3x-Ratchet-Rolls, Pitch-Motion & Cutoff-Automation) als `.mid`-Datei (`BeatForge_XS2_FLStudio_<BPM>BPM.mid`) in den **`Downloads`-Ordner** zum direkten Reinziehen in die **FL Studio Piano Roll**.
+* **`💿 FL .WAV` (1-Klick Einzel-Sound-Export):**
+  * Exportiert den aktuell ausgewählten **XT-2 / Hardtekk-Kick** oder Sample-Slot sofort als **16-Bit 44.1 kHz `.wav`-Datei** in den **`Downloads`-Ordner** für die **FL Studio Playlist** oder den Sampler.
 
 ---
 
