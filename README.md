@@ -65,7 +65,8 @@ Direkte Anbindung an **FL Studio** auf Windows (WebMIDI / *loopMIDI*) und Androi
 
 ### 🖥️ 5. Windows Desktop & PC-Optimierung
 Speziell für Windows 10/11 optimierte Steuerung:
-* **Eigenständiger Windows-App-Starter (`Start_BeatForge_Windows.bat`):** Startet die Groovebox per Doppelklick als rahmenloses Desktop-Anwendungsfenster (`1440×860`).
+* **1-Klick Windows-Desktop-App Installation (`[🖥️ ALS WINDOWS-APP INSTALLIEREN]`):** Installiert die Groovebox über Microsoft Edge / Google Chrome mit einem Klick als eigenständige Windows-Desktop-App (inkl. Desktop-Verknüpfung, Startmenü-Eintrag und rahmenlosem Fenster) – **100 % ohne `.exe`-Virenscanner-Fehlalarm**!
+* **Offline Single-File Start (`BeatForge_XS2_Windows.html` / `index.html`):** Kann auch komplett offline per Doppelklick gestartet werden.
 * **PC-Tastatursteuerung (Live-Drumming & Shortcuts):**
   * **`[LEERTASTE]`** – Play / Stop
   * **`[1]` bis `[8]`** – Pads 1–8 direkt spielen / Steps setzen / Muten
@@ -88,13 +89,20 @@ Speziell für Windows 10/11 optimierte Steuerung:
 
 ## 📱 Installation & Nutzung
 
-### 🖥️ Auf Windows 10 / 11 (Desktop-App)
-Du hast für Windows zwei Möglichkeiten (beide sind komplett eigenständig und brauchen keine weiteren Dateien):
-1. **Ohne SmartScreen-/Browser-Warnung (Empfohlen):** Lade **[`BeatForge_XS2_Windows.html`](./BeatForge_XS2_Windows.html)** (oder **[`BeatForge_XS2_Windows.zip`](./BeatForge_XS2_Windows.zip)**) herunter und öffne sie per Doppelklick – startet sofort ohne jegliche Sicherheitswarnung mit voller PC-Tastatur-, Mausrad-, Drag-&-Drop- und FL-Studio-Unterstützung!
-2. **Als `.exe` Starter:** Lade **[`BeatForge_XS2_Windows.exe`](./BeatForge_XS2_Windows.exe)** herunter und starte sie per Doppelklick.
+### 🖥️ Auf Windows 10 / 11 (Setup-Assistent `.exe`, Desktop-App & Offline-Starter)
+1. **Mit Windows Setup-Assistent installieren (`BeatForge_XS2_Setup.exe`):**
+   * Lade **[`BeatForge_XS2_Setup.exe`](./BeatForge_XS2_Setup.exe)** (und optional **[`BeatForge_XS2_Windows.html`](./BeatForge_XS2_Windows.html)** im selben Ordner) herunter und starte die `.exe`.
+   * Im grafischen Setup-Fenster kannst du auswählen:
+     * ✅ **Desktop-Verknüpfung erstellen (`VORTEX BeatForge XS-2`)**
+     * ✅ **Im Windows-Startmenü eintragen**
+   * Klicke auf **`✔ INSTALLIEREN & STARTEN`** (installiert nach `%LocalAppData%\Programs\VortexBeatForgeXS2`) oder auf **`▶ DIREKT STARTEN`**.
+2. **Oder direkt im Browser als Windows-App installieren:**
+   * Öffne **[https://katazune.github.io/beatforge-xs2/](https://katazune.github.io/beatforge-xs2/)** in **Microsoft Edge** oder **Google Chrome** und klicke unten rechts auf **`[🖥️ ALS WINDOWS-APP INSTALLIEREN]`**.
+3. **Oder direkt per Doppelklick ohne Installation:**
+   * Öffne **[`BeatForge_XS2_Windows.html`](./BeatForge_XS2_Windows.html)** per Doppelklick.
 
 ### 🍎 Auf iPhone & iPad (iOS Web-App / PWA)
-1. Öffne den **GitHub Pages Link** dieses Projekts in **Safari** auf deinem iPhone oder iPad.
+1. Öffne **[https://katazune.github.io/beatforge-xs2/](https://katazune.github.io/beatforge-xs2/)** in **Safari** auf deinem iPhone oder iPad.
 2. Tippe unten in Safari auf das **Teilen-Symbol** (Quadrat mit Pfeil nach oben).
 3. Wähle **„Zum Home-Bildschirm“** (*Add to Home Screen*).
 4. Starte **BeatForge XS2** vom Home-Bildschirm – die App läuft komplett im **Vollbildmodus (Querformat)** wie eine native App!
@@ -106,8 +114,8 @@ Du hast für Windows zwei Möglichkeiten (beide sind komplett eigenständig und 
 ---
 
 ## 🛠️ Projektstruktur
-* `BeatForge_XS2_Windows.html` & `BeatForge_XS2_Windows.zip` – Eigenständige Single-File Windows-Desktop-App (komplett ohne SmartScreen-/Virenscanner-Fehlalarm).
-* `BeatForge_XS2_Windows.exe` – Windows-Desktop-Starter mit offizieller Assembly-Signatur.
+* `BeatForge_XS2_Setup.exe` – Grafischer Windows-Installationsassistent & Studio-Starter (mit Desktop- & Startmenü-Verknüpfung, 19 KB, ohne eingebettete Skript-Ressourcen gegen Defender-Fehlalarme).
+* `BeatForge_XS2_Windows.html` – Eigenständige Single-File Windows-Desktop-Version (mit eingebettetem Icon).
 * `ios_webapp/index.html`, `ios_webapp/manifest.json` & `ios_webapp/icon.svg` – Komplette Windows-, iOS- & Web-Version (HTML5 + WebAudio + WebMIDI PWA).
 * `app/src/main/java/com/example/es2korg/MainActivity.kt` – Native Android Jetpack Compose Hardware-UI + USB-MIDI.
 * `app/src/main/java/com/example/es2korg/ElectribeAudioEngine.kt` – Echtzeit-Polyphonie-Synthesizer, Drum-Creator, Valve-Force-Tube, MIDI-Exporter & Sampler-Engine (44.1 kHz PCM).
