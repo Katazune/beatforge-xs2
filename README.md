@@ -88,9 +88,10 @@ Speziell für Windows 10/11 optimierte Steuerung:
 
 ## 📱 Installation & Nutzung
 
-### 🖥️ Auf Windows 10 / 11 (Eigenständige `.exe` Desktop-App)
-1. Lade einfach die einzelne Datei **[`BeatForge_XS2_Windows.exe`](./BeatForge_XS2_Windows.exe)** herunter (keine weiteren Dateien nötig – der komplette Synthesizer ist direkt in der `.exe` eingebettet!).
-2. Starte **`BeatForge_XS2_Windows.exe`** per Doppelklick – die Groovebox öffnet sich sofort als eigenständiges Windows-App-Fenster mit voller PC-Tastatur-, Mausrad-, Drag-&-Drop- und FL-Studio-Unterstützung.
+### 🖥️ Auf Windows 10 / 11 (Desktop-App)
+Du hast für Windows zwei Möglichkeiten (beide sind komplett eigenständig und brauchen keine weiteren Dateien):
+1. **Ohne SmartScreen-/Browser-Warnung (Empfohlen):** Lade **[`BeatForge_XS2_Windows.html`](./BeatForge_XS2_Windows.html)** (oder **[`BeatForge_XS2_Windows.zip`](./BeatForge_XS2_Windows.zip)**) herunter und öffne sie per Doppelklick – startet sofort ohne jegliche Sicherheitswarnung mit voller PC-Tastatur-, Mausrad-, Drag-&-Drop- und FL-Studio-Unterstützung!
+2. **Als `.exe` Starter:** Lade **[`BeatForge_XS2_Windows.exe`](./BeatForge_XS2_Windows.exe)** herunter und starte sie per Doppelklick.
 
 ### 🍎 Auf iPhone & iPad (iOS Web-App / PWA)
 1. Öffne den **GitHub Pages Link** dieses Projekts in **Safari** auf deinem iPhone oder iPad.
@@ -105,8 +106,8 @@ Speziell für Windows 10/11 optimierte Steuerung:
 ---
 
 ## 🛠️ Projektstruktur
-* `BeatForge_XS2_Windows.exe` – Eigenständige Windows-Desktop-App (Single-File `.exe` mit eingebetteter Synth-Engine & Icon).
-* `Start_BeatForge_Windows.bat` – Alternativer Windows-Starter im Projektordner.
+* `BeatForge_XS2_Windows.html` & `BeatForge_XS2_Windows.zip` – Eigenständige Single-File Windows-Desktop-App (komplett ohne SmartScreen-/Virenscanner-Fehlalarm).
+* `BeatForge_XS2_Windows.exe` – Windows-Desktop-Starter mit offizieller Assembly-Signatur.
 * `ios_webapp/index.html`, `ios_webapp/manifest.json` & `ios_webapp/icon.svg` – Komplette Windows-, iOS- & Web-Version (HTML5 + WebAudio + WebMIDI PWA).
 * `app/src/main/java/com/example/es2korg/MainActivity.kt` – Native Android Jetpack Compose Hardware-UI + USB-MIDI.
 * `app/src/main/java/com/example/es2korg/ElectribeAudioEngine.kt` – Echtzeit-Polyphonie-Synthesizer, Drum-Creator, Valve-Force-Tube, MIDI-Exporter & Sampler-Engine (44.1 kHz PCM).
