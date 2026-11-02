@@ -8,7 +8,8 @@
   <meta name="apple-mobile-web-app-title" content="BeatForge XS2" />
   <meta name="theme-color" content="#820E17" />
   <link rel="manifest" href="manifest.json" />
-  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='36' fill='%23820E17'/><text x='96' y='115' text-anchor='middle' fill='white' font-family='sans-serif' font-weight='900' font-size='56'>XS2</text></svg>" />
+  <link rel="icon" type="image/svg+xml" href="icon.svg" />
+  <link rel="apple-touch-icon" href="icon.svg" />
   <title>VORTEX BeatForge XS-2 Sampler & Synth</title>
   <style>
     * {
@@ -453,7 +454,11 @@
             <div class="hw-btn" id="btnAssignPad">-> TASTE</div>
           </div>
           <div class="btn-row">
-            <div class="hw-btn" id="btnPtMute">PT MUTE</div>
+            <div class="hw-btn" id="btnTube">TUBE 25%</div>
+            <div class="hw-btn" id="btnMotSeq">MOT.SEQ</div>
+          </div>
+          <div class="btn-row">
+            <div class="hw-btn" id="btnDice">🎲 DICE</div>
             <div class="hw-btn" id="btnErase">ERASE</div>
           </div>
         </div>
@@ -478,9 +483,12 @@
     <div class="transport-bar">
       <div class="transport-left">
         <div class="fn-btn active-red" id="modeTrigger">TRIGGER</div>
-        <div class="fn-btn" id="modeSeq">SEQUENCER</div>
-        <div class="fn-btn" id="modeSelect">PART SELECT</div>
-        <div class="fn-btn" id="modeMute">PART MUTE</div>
+        <div class="fn-btn" id="modeSeq">SEQ</div>
+        <div class="fn-btn" id="modeKeyb">KEYB</div>
+        <div class="fn-btn" id="modeAccent">ACCENT</div>
+        <div class="fn-btn" id="modeRoll">ROLL</div>
+        <div class="fn-btn" id="btnBeat8">BEAT 16</div>
+        <div class="fn-btn" id="modeMute">MUTE</div>
         <div class="fn-btn" id="btnPlay">► PLAY</div>
         <div class="fn-btn" id="btnRec">● REC</div>
         <div class="fn-btn" id="btnKickToPad">+ KICK -> PAD</div>
@@ -516,12 +524,23 @@
       { name: "ZAP LASER", cat: "FX" },
       { name: "SONG / LOOP", cat: "SAMPLE" },
       { name: "BD 808 SUB", cat: "DRUM" },
-      { name: "FM BELL", cat: "SYNTH" }
+      { name: "FM BELL", cat: "SYNTH" },
+      { name: "EMX TRIBE KICK", cat: "BLECHTRIBE" },
+      { name: "ACID SCREAM 303", cat: "BLECHTRIBE" },
+      { name: "HOOVER RAVE LD", cat: "BLECHTRIBE" },
+      { name: "VOCAL FORMANT", cat: "BLECHTRIBE" }
     ];
 
     const FILTER_TYPES = ["LPF", "HPF", "BPF", "OFF"];
     const IFX_TYPES = ["OFF", "DRIVE", "CRUSH", "DELAY"];
-    const MENU_PAGES = ["OSC / SAMPLE", "TEMPO BPM", "SWING %", "TOUCH SCALE", "INSERT FX TYPE"];
+    const MENU_PAGES = ["OSC / SAMPLE", "TEMPO BPM", "SWING %", "TOUCH SCALE", "INSERT FX TYPE", "VALVE FORCE TUBE", "BLECH DISPLAY/LED"];
+    const BLECH_THEMES = [
+      { label: "BLECH CYAN", oled: "#79D5FF", pad: "#00B4D8" },
+      { label: "NEON PINK", oled: "#F472B6", pad: "#EC4899" },
+      { label: "MATRIX GRÜN", oled: "#4ADE80", pad: "#10B981" },
+      { label: "AMBER GOLD", oled: "#FBBF24", pad: "#D97706" },
+      { label: "BLECH VIOLET", oled: "#C084FC", pad: "#9333EA" }
+    ];
     const SCALES = [
       { label: "MINOR PENT", notes: [0, 3, 5, 7, 10, 12, 15, 17, 19, 22, 24] },
       { label: "NATURAL MIN", notes: [0, 2, 3, 5, 7, 8, 10, 12, 14, 15, 17, 19] },
@@ -535,6 +554,11 @@
       category: OSC_PRESETS[i].cat,
       isMuted: false,
       activeSteps: new Set(),
+      accentSteps: new Set(),
+      rollSteps: new Set(),
+      motionCutoff: new Array(16).fill(-1),
+      motionPitch: new Array(16).fill(-1),
+      motionSeqMode: "OFF", // OFF, REC, PLAY
       oscIndex: i,
       pitchGlide: 0.5,
       oscEdit: 0.2,
@@ -556,7 +580,7 @@
     }));
 
     let selectedPartId = 1;
-    let currentPadMode = "TRIGGER"; // TRIGGER, STEP_SEQ, PART_SELECT, MUTE
+    let currentPadMode = "TRIGGER"; // TRIGGER, STEP_SEQ, ACCENT, STEP_ROLL, PART_SELECT, MUTE
     let touchpadMode = "TOUCH_SCALE"; // TOUCH_SCALE, GATE_ARP, MASTER_FX
     let menuPageIdx = 0;
     let scaleIdx = 0;
@@ -565,6 +589,9 @@
     let isRecording = false;
     let bpm = 128;
     let swing = 50;
+    let valveForceTube = 0.25;
+    let beat8Mode = false;
+    let blechThemeIdx = 0;
     let isAssigningToPad = false;
     let lastLoadedKickBuffer = null;
     let displayNotice = null;
@@ -575,12 +602,14 @@
     const E2_DRUM_TYPES = [
       { id: "KICK_909", label: "909 PUNCH KICK", short: "MY 909 BD" },
       { id: "KICK_HARDTEK", label: "HARDTEK / GABBER", short: "HARD KICK" },
+      { id: "KICK_BLECHTRIBE", label: "EMX BLECHTRIBE BD", short: "EMX KICK" },
       { id: "KICK_808", label: "808 SUB BOOM", short: "MY 808 BD" },
       { id: "SNARE_ANALOG", label: "ANALOG SNARE", short: "MY SNARE" },
       { id: "SNARE_TRAP", label: "CRISP / TRAP SD", short: "TRAP SD" },
       { id: "CLAP_FAT", label: "CLUB CLAP", short: "MY CLAP" },
       { id: "HIHAT_METAL", label: "METAL HI-HAT", short: "MY HIHAT" },
-      { id: "BASS_DONK", label: "FM DONK BASS", short: "MY DONK" }
+      { id: "BASS_DONK", label: "FM DONK BASS", short: "MY DONK" },
+      { id: "ACID_SCREAM", label: "303 ACID SCREAM", short: "303 ACID" }
     ];
     let e2TypeIdx = 0;
     const e2Params = {
@@ -615,6 +644,7 @@
           phase += 2 * Math.PI * (baseF + drop) * dt;
           let body = Math.sin(phase);
           if (type === "KICK_HARDTEK") body = Math.tanh(body * (1.8 + e2Params.snappy * 3));
+          else if (type === "KICK_BLECHTRIBE") body = Math.tanh((body + Math.sin(phase * 2) * (0.28 + e2Params.snappy * 0.55)) * 2.2);
           const clickEnv = Math.exp(-t * 140);
           const trans = (Math.sin(phase * 3.5) * 0.6 + (Math.random() * 2 - 1) * 0.4) * clickEnv * e2Params.click * 1.4;
           raw = (body + trans) * ampEnv;
@@ -659,7 +689,25 @@
     // --- WEBAUDIO ENGINE ---
     let audioCtx = null;
     let masterFilter = null;
+    let tubeShaper = null;
     let masterGain = null;
+
+    function makeTubeCurve(amount) {
+      const n = 1024;
+      const curve = new Float32Array(n);
+      const k = 1 + amount * 6.5;
+      for (let i = 0; i < n; i++) {
+        const x = (i * 2) / n - 1;
+        curve[i] = Math.tanh((x + 0.08 * amount * x * x) * k);
+      }
+      return curve;
+    }
+
+    function updateTubeCurve() {
+      if (tubeShaper) {
+        tubeShaper.curve = makeTubeCurve(valveForceTube);
+      }
+    }
 
     function ensureAudio() {
       if (!audioCtx) {
@@ -668,9 +716,13 @@
         masterFilter = audioCtx.createBiquadFilter();
         masterFilter.type = "lowpass";
         masterFilter.frequency.value = 18000;
+        tubeShaper = audioCtx.createWaveShaper();
+        tubeShaper.curve = makeTubeCurve(valveForceTube);
+        tubeShaper.oversample = "2x";
         masterGain = audioCtx.createGain();
         masterGain.gain.value = 0.9;
-        masterFilter.connect(masterGain);
+        masterFilter.connect(tubeShaper);
+        tubeShaper.connect(masterGain);
         masterGain.connect(audioCtx.destination);
       }
       if (audioCtx.state === "suspended") {
@@ -817,15 +869,28 @@
 
     function runStep() {
       if (!isPlaying) return;
+      const mult = beat8Mode ? 2 : 1; // BLECH 1.4.0 BEAT 8 Modus (Achtelnoten)
+      const baseMs = ((60000 / bpm) / 4) * mult;
+      const swingFactor = (swing - 50) / 50;
+      const delayMs = (currentStep % 2 === 1) ? baseMs * (1 + swingFactor) : baseMs * (1 - swingFactor);
+
       parts.forEach(p => {
+        if (p.motionSeqMode === "PLAY") {
+          const mc = p.motionCutoff[currentStep - 1];
+          if (mc >= 0) p.cutoff = mc;
+          const mp = p.motionPitch[currentStep - 1];
+          if (mp >= 0) p.pitchGlide = mp;
+        }
         if (!p.isMuted && p.activeSteps.has(currentStep)) {
-          triggerPart(p.id, 0.9);
+          const vel = p.accentSteps.has(currentStep) ? 1.35 : 0.9;
+          triggerPart(p.id, vel);
+          if (p.rollSteps.has(currentStep)) {
+            setTimeout(() => { if (isPlaying) triggerPart(p.id, vel * 0.85); }, delayMs * 0.33);
+            setTimeout(() => { if (isPlaying) triggerPart(p.id, vel * 0.78); }, delayMs * 0.66);
+          }
         }
       });
       renderUI();
-      const baseMs = (60000 / bpm) / 4;
-      const swingFactor = (swing - 50) / 50;
-      const delayMs = (currentStep % 2 === 1) ? baseMs * (1 + swingFactor) : baseMs * (1 - swingFactor);
       seqTimer = setTimeout(() => {
         currentStep = currentStep >= 16 ? 1 : currentStep + 1;
         runStep();
@@ -872,7 +937,12 @@
           if (!circle.hasPointerCapture(e.pointerId)) return;
           const dy = startY - e.clientY;
           const nextVal = Math.max(0, Math.min(1, startVal + dy / 90));
-          parts[selectedPartId - 1][spec.key] = nextVal;
+          const activeP = parts[selectedPartId - 1];
+          activeP[spec.key] = nextVal;
+          if (activeP.motionSeqMode === "REC") {
+            if (spec.key === "cutoff") activeP.motionCutoff[currentStep - 1] = nextVal;
+            if (spec.key === "pitchGlide") activeP.motionPitch[currentStep - 1] = nextVal;
+          }
           if (isBlueE2Mode) {
             if (spec.key === "pitchGlide") e2Params.tune = nextVal;
             else if (spec.key === "oscEdit") e2Params.sweep = nextVal;
@@ -954,6 +1024,31 @@
           if (!(activePart.hasCustomSample && activePart.loopSample && activePart.activeSource)) {
             triggerPart(activePart.id, 0.9);
           }
+        }
+      } else if (currentPadMode === "KEYBOARD") {
+        const semi = index - 1;
+        triggerPart(selectedPartId, 0.95, semi);
+        if (isRecording && isPlaying) {
+          activePart.activeSteps.add(currentStep);
+          activePart.motionSeqMode = "PLAY";
+          activePart.motionPitch[currentStep - 1] = Math.max(0.1, Math.min(0.95, 0.5 + semi / 24));
+        }
+        displayNotice = `KEYB NOTE: +${semi} ST (${activePart.name})`;
+      } else if (currentPadMode === "ACCENT") {
+        if (activePart.accentSteps.has(index)) {
+          activePart.accentSteps.delete(index);
+        } else {
+          activePart.accentSteps.add(index);
+          activePart.activeSteps.add(index);
+          triggerPart(activePart.id, 1.35);
+        }
+      } else if (currentPadMode === "STEP_ROLL") {
+        if (activePart.rollSteps.has(index)) {
+          activePart.rollSteps.delete(index);
+        } else {
+          activePart.rollSteps.add(index);
+          activePart.activeSteps.add(index);
+          triggerPart(activePart.id, 1.0);
         }
       } else if (currentPadMode === "PART_SELECT") {
         selectedPartId = index;
@@ -1049,8 +1144,50 @@
     };
     document.getElementById("modeTrigger").onclick = () => { currentPadMode = "TRIGGER"; renderUI(); };
     document.getElementById("modeSeq").onclick = () => { currentPadMode = "STEP_SEQ"; renderUI(); };
-    document.getElementById("modeSelect").onclick = () => { currentPadMode = "PART_SELECT"; renderUI(); };
+    document.getElementById("modeKeyb").onclick = () => {
+      currentPadMode = "KEYBOARD";
+      displayNotice = `BLECH KEYBOARD + NOTENASSISTENT (${SCALES[scaleIdx].label})`;
+      renderUI();
+    };
+    document.getElementById("modeAccent").onclick = () => {
+      currentPadMode = "ACCENT";
+      displayNotice = "BLECHTRIBE ACCENT: TIPPE STEPS FÜR +40% PUNCH!";
+      renderUI();
+    };
+    document.getElementById("modeRoll").onclick = () => {
+      currentPadMode = "STEP_ROLL";
+      displayNotice = "BLECHTRIBE ROLL: TIPPE STEPS FÜR 3X RATCHET!";
+      renderUI();
+    };
+    document.getElementById("btnBeat8").onclick = () => {
+      beat8Mode = !beat8Mode;
+      displayNotice = beat8Mode ? "BLECH BEAT 8 ON (1/8 STEPS - DOPPELT SO LANG)" : "BEAT 16 (NORMAL)";
+      renderUI();
+    };
     document.getElementById("modeMute").onclick = () => { currentPadMode = "MUTE"; renderUI(); };
+
+    document.getElementById("btnTube").onclick = () => {
+      valveForceTube = valveForceTube >= 0.95 ? 0.0 : Math.min(1.0, valveForceTube + 0.25);
+      updateTubeCurve();
+      displayNotice = `BLECHTRIBE VALVE FORCE TUBE: ${Math.round(valveForceTube * 100)}%`;
+      renderUI();
+    };
+    document.getElementById("btnMotSeq").onclick = () => {
+      const p = parts[selectedPartId - 1];
+      if (p.motionSeqMode === "OFF") {
+        p.motionSeqMode = "REC";
+        displayNotice = "MOTION SEQ REC: DREHE CUTOFF/PITCH WÄHREND PLAY!";
+      } else if (p.motionSeqMode === "REC") {
+        p.motionSeqMode = "PLAY";
+        displayNotice = "MOTION SEQ PLAY: AUTOMATION AKTIV!";
+      } else {
+        p.motionSeqMode = "OFF";
+        p.motionCutoff.fill(-1);
+        p.motionPitch.fill(-1);
+        displayNotice = "MOTION SEQ OFF / GELÖSCHT";
+      }
+      renderUI();
+    };
 
     document.getElementById("btnPrevPt").onclick = () => {
       selectedPartId = selectedPartId > 1 ? selectedPartId - 1 : 16;
@@ -1094,6 +1231,11 @@
         const nextIdx = (IFX_TYPES.indexOf(p.insertFxType) + delta + IFX_TYPES.length) % IFX_TYPES.length;
         p.insertFxType = IFX_TYPES[nextIdx];
         p.insertFxEnabled = p.insertFxType !== "OFF";
+      } else if (menuPageIdx === 5) {
+        valveForceTube = Math.max(0, Math.min(1, valveForceTube + delta * 0.05));
+        updateTubeCurve();
+      } else if (menuPageIdx === 6) {
+        blechThemeIdx = (blechThemeIdx + delta + BLECH_THEMES.length) % BLECH_THEMES.length;
       }
       renderUI();
     }
@@ -1165,14 +1307,42 @@
       p.insertFxEnabled = !p.insertFxEnabled;
       renderUI();
     };
-    document.getElementById("btnPtMute").onclick = () => {
+    document.getElementById("btnDice").onclick = () => {
       const p = parts[selectedPartId - 1];
-      p.isMuted = !p.isMuted;
-      if (p.isMuted) stopPartLoop(p);
+      const isSynth = p.category.includes("SYNTH") || p.category.includes("BLECH") || p.oscIndex >= 10;
+      p.activeSteps.clear();
+      p.accentSteps.clear();
+      const notes = SCALES[scaleIdx].notes;
+      if (selectedPartId === 1 || p.name.includes("BD") || p.name.includes("KICK")) {
+        [1, 5, 9, 13].forEach(s => p.activeSteps.add(s));
+        [4, 8, 11, 15, 16].forEach(s => { if (Math.random() < 0.35) p.activeSteps.add(s); });
+        p.accentSteps.add(1); p.accentSteps.add(9);
+      } else if (isSynth) {
+        p.motionSeqMode = "PLAY";
+        for (let s = 1; s <= 16; s++) {
+          if (s === 1 || Math.random() < 0.55) {
+            p.activeSteps.add(s);
+            const semi = notes[Math.floor(Math.random() * notes.length)];
+            p.motionPitch[s - 1] = Math.max(0.15, Math.min(0.9, 0.5 + semi / 24));
+            p.motionCutoff[s - 1] = 0.3 + Math.random() * 0.65;
+          }
+        }
+      } else {
+        for (let s = 1; s <= 16; s++) {
+          if (Math.random() < (s % 4 === 3 ? 0.75 : 0.3)) p.activeSteps.add(s);
+        }
+      }
+      if (!isPlaying) startSequencer();
+      displayNotice = `BLECH WÜRFEL (DICE): NEUES PATTERN AUF PT${selectedPartId}!`;
       renderUI();
     };
     document.getElementById("btnErase").onclick = () => {
-      parts[selectedPartId - 1].activeSteps.clear();
+      const p = parts[selectedPartId - 1];
+      p.activeSteps.clear();
+      p.accentSteps.clear();
+      p.rollSteps.clear();
+      p.motionCutoff.fill(-1);
+      p.motionPitch.fill(-1);
       displayNotice = `PT ${selectedPartId} CLEARED`;
       renderUI();
     };
@@ -1228,20 +1398,25 @@
         ? `VORTEX BEATFORGE XT-2 SYNTH CREATOR • ${E2_DRUM_TYPES[e2TypeIdx].label} • STEP ${String(currentStep).padStart(2, "0")}/16`
         : `VORTEX BEATFORGE XS-2 SAMPLER • STEP ${String(currentStep).padStart(2, "0")}/16`;
 
+      const theme = BLECH_THEMES[blechThemeIdx];
+      const blechy = !isPlaying ? "(^._.^)" : currentStep % 4 === 1 ? "(\\^o^/)" : currentStep % 2 === 0 ? "(^o_o^)" : "(~^.^~)";
       const oledTitle = document.getElementById("oledTitle");
       oledTitle.textContent = `PT${String(activePart.id).padStart(2, "0")}: ${activePart.name}`;
-      oledTitle.className = activePart.hasCustomSample ? "custom-smp" : "";
+      oledTitle.style.color = activePart.hasCustomSample ? "#4ADE80" : theme.oled;
 
-      document.getElementById("oledBpm").textContent = `${bpm} BPM ${isPlaying ? "►" : "❚❚"}`;
+      document.getElementById("oledBpm").textContent = `${blechy} ${bpm}${beat8Mode ? "/8" : ""} ${isPlaying ? "►" : "❚❚"}`;
+      document.getElementById("oledBpm").style.color = isPlaying ? "#4ADE80" : theme.oled;
 
       const oledSub = document.getElementById("oledSub");
       const defaultSub = menuPageIdx === 0 ? `OSC: ${activePart.oscIndex + 1} ${activePart.name} (${activePart.filterType})`
-        : menuPageIdx === 1 ? `TEMPO: ${bpm} BPM [SWING: ${swing}%]`
+        : menuPageIdx === 1 ? `TEMPO: ${bpm} BPM [${beat8Mode ? "BEAT 8" : "BEAT 16"}] SWING: ${swing}%`
         : menuPageIdx === 2 ? `SWING: ${swing}%`
         : menuPageIdx === 3 ? `SCALE: ${SCALES[scaleIdx].label}`
-        : `IFX: ${activePart.insertFxType} (${activePart.insertFxEnabled ? "ON" : "OFF"})`;
+        : menuPageIdx === 4 ? `IFX: ${activePart.insertFxType} (${activePart.insertFxEnabled ? "ON" : "OFF"})`
+        : menuPageIdx === 5 ? `BLECHTRIBE VALVE TUBE: ${Math.round(valveForceTube * 100)}%`
+        : `BLECH FARBE: ${theme.label}`;
       oledSub.textContent = displayNotice || defaultSub;
-      oledSub.className = displayNotice ? "oled-row2 notice" : "oled-row2";
+      oledSub.style.color = displayNotice ? "#FFD166" : theme.oled;
 
       document.getElementById("valueKnobLabel").textContent = MENU_PAGES[menuPageIdx];
       document.getElementById("partFooter").textContent = `PART ${activePart.id}`;
@@ -1262,14 +1437,21 @@
 
       document.getElementById("btnAssignPad").className = `hw-btn ${isAssigningToPad ? "active-purple" : ""}`;
       document.getElementById("btnAssignPad").textContent = isAssigningToPad ? "PAD WÄHLEN" : "-> TASTE";
-      document.getElementById("btnPtMute").className = `hw-btn ${activePart.isMuted ? "active-amber" : ""}`;
+      document.getElementById("btnTube").className = `hw-btn ${valveForceTube > 0.01 ? "active-amber" : ""}`;
+      document.getElementById("btnTube").textContent = `TUBE ${Math.round(valveForceTube * 100)}%`;
+      document.getElementById("btnMotSeq").className = `hw-btn ${activePart.motionSeqMode === "REC" ? "active-red" : activePart.motionSeqMode === "PLAY" ? "active-green" : ""}`;
+      document.getElementById("btnMotSeq").textContent = `MOT:${activePart.motionSeqMode}`;
       document.getElementById("btnFilterType").textContent = `FLT: ${activePart.filterType}`;
       document.getElementById("btnIfxToggle").textContent = `IFX: ${activePart.insertFxEnabled ? activePart.insertFxType : "OFF"}`;
       document.getElementById("btnIfxToggle").className = `hw-btn ${activePart.insertFxEnabled ? "active-amber" : ""}`;
 
       document.getElementById("modeTrigger").className = `fn-btn ${currentPadMode === "TRIGGER" ? "active-red" : ""}`;
       document.getElementById("modeSeq").className = `fn-btn ${currentPadMode === "STEP_SEQ" ? "active-seq" : ""}`;
-      document.getElementById("modeSelect").className = `fn-btn ${currentPadMode === "PART_SELECT" ? "active-blue" : ""}`;
+      document.getElementById("modeKeyb").className = `fn-btn ${currentPadMode === "KEYBOARD" ? "active-purple" : ""}`;
+      document.getElementById("modeAccent").className = `fn-btn ${currentPadMode === "ACCENT" ? "active-amber" : ""}`;
+      document.getElementById("modeRoll").className = `fn-btn ${currentPadMode === "STEP_ROLL" ? "active-blue" : ""}`;
+      document.getElementById("btnBeat8").className = `fn-btn ${beat8Mode ? "active-purple" : ""}`;
+      document.getElementById("btnBeat8").textContent = beat8Mode ? "BEAT 8" : "BEAT 16";
       document.getElementById("modeMute").className = `fn-btn ${currentPadMode === "MUTE" ? "active-amber" : ""}`;
       document.getElementById("btnPlay").className = `fn-btn ${isPlaying ? "active-green" : ""}`;
       document.getElementById("btnPlay").textContent = isPlaying ? "❚❚ STOP" : "► PLAY";
@@ -1296,9 +1478,25 @@
         } else if (currentPadMode === "STEP_SEQ") {
           const isStep = activePart.activeSteps.has(i);
           const isPlay = isPlaying && currentStep === i;
+          const isPolySynth = activePart.category.includes("SYNTH") || activePart.oscIndex >= 10;
           if (isStep && isPlay) { color = "#FFFFFF"; lit = true; }
           else if (isPlay) { color = "#FF7777"; lit = true; }
-          else if (isStep) { color = "#D61828"; lit = true; }
+          else if (isStep) { color = isPolySynth ? "#EC4899" : theme.pad; lit = true; }
+        } else if (currentPadMode === "KEYBOARD") {
+          const semi = i - 1;
+          const inScale = SCALES[scaleIdx].notes.includes(semi);
+          if (semi % 12 === 0) { color = "#EC4899"; lit = true; }
+          else if (inScale) { color = theme.pad; lit = true; }
+        } else if (currentPadMode === "ACCENT") {
+          const isAcc = activePart.accentSteps.has(i);
+          const isPlay = isPlaying && currentStep === i;
+          if (isAcc && isPlay) { color = "#FFFFFF"; lit = true; }
+          else if (isAcc) { color = "#F59E0B"; lit = true; }
+        } else if (currentPadMode === "STEP_ROLL") {
+          const isRoll = activePart.rollSteps.has(i);
+          const isPlay = isPlaying && currentStep === i;
+          if (isRoll && isPlay) { color = "#FFFFFF"; lit = true; }
+          else if (isRoll) { color = "#0084D1"; lit = true; }
         } else if (currentPadMode === "PART_SELECT") {
           if (i === selectedPartId) { color = "#0084D1"; lit = true; }
         } else if (currentPadMode === "MUTE") {
