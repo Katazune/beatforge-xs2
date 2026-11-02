@@ -1,33 +1,112 @@
-# 🎛️ VORTEX BeatForge XS-2 / XT-2 (BLECHTRIBE Edition) – iOS & Web Groovebox
+# 🎛️ VORTEX BeatForge XS-2 / XT-2 (BLECHTRIBE Edition) – Groovebox, Sampler & Drum Synthesizer
 
-**VORTEX BeatForge XS-2 / XT-2** ist eine 16-Part Hardware-Groovebox, Drum-Machine, Sampler und Synthesizer-Workstation für **iOS (iPhone & iPad)**, **Android** und **Desktop-Browser** – inklusive aller Kult-Features aus **BLECHTRIBE v1.4.0**, **Hacktribe** und den Röhren-Electribes (**EMX-1 / ESX-1**).
+**VORTEX BeatForge XS-2 / XT-2** ist eine professionelle 16-Part Hardware-Groovebox, Drum-Machine, Sampler und Synthesizer-Workstation für **Android** (native APK), **Windows Desktop** (eigenständiges App-Fenster mit Tastatur-, Mausrad-, Drag-&-Drop- & **FL Studio**-Steuerung) und **iOS / Web** (installierbare PWA für iPhone & iPad) – inklusive aller Kult-Features aus **BLECHTRIBE v1.4.0**, **Hacktribe** und den Röhren-Electribes (**EMX-1 / ESX-1**).
 
 ---
 
 ## ✨ Hauptfunktionen
 
 ### 🔴 1. BeatForge XS-2 Modus (Roter Sampler-Modus)
-* **Durchlaufende Lieder & Loops (`+ SONG LOOP`):** Importiere komplette Songs oder Loops (`.wav`, `.mp3`, `.m4a`, `.ogg`), die nahtlos im Hintergrund durchlaufen, während du live eigene Kicks, Snares und Hi-Hats dazuspielst oder sequenzierst.
-* **Eigene Kicks & One-Shot Samples (`+ KICK` / `-> TASTE`):** Lade eigene Kick- oder Drum-Samples direkt vom Smartphone und lege sie per Antippen frei auf jede beliebige der **16 Tasten (Pads 1–16)**.
-* **22 integrierte Drum-, Synth- & Blechtribe-Oszillatoren:** Von `BD 909 PUNCH`, `BD 808 SUB`, `EMX TRIBE KICK`, `SD ANALOG`, `HAND CLAP`, `CLOSED/OPEN HH` bis hin zu `ACID SAW 303`, `ACID SCREAM 303`, `HOOVER RAVE LD`, `VOCAL FORMANT`, `SUB BASS`, `DUAL SAW LEAD` und `FM BELL`.
-
-### 🔵 2. BeatForge XT-2 Modus (Blauer Drum- & Synth-Creator)
-Per Klick auf **`XT2 BLAU`** (oder das Badge oben rechts) wechselt das Gehäuse in den blauen Synthesizer-Modus, in dem du eigene Drums & Bässe von Grund auf selbst schrauben kannst:
-* **10 Synthese-Modelle (`◄ DRUM TYP ►`):**
-  * `909 PUNCH KICK`, `HARDTEK / GABBER`, `EMX BLECHTRIBE BD`, `808 SUB BOOM`, `ANALOG SNARE`, `CRISP / TRAP SD`, `CLUB CLAP`, `METAL HI-HAT`, `FM DONK BASS`, `303 ACID SCREAM`.
-* **Direkt auf Tasten speichern (`-> TASTE`):** Jeden selbstgebauten Sound mit einem Tipp auf jedes beliebige Pad (1–16) legen.
-
-### 🔥 3. BLECHTRIBE Edition (BLECH 1.4.0 + EMX/ESX Features)
-* **`🎲 DICE` (Melodie- & Beat-Generator):** Würfelt per Klick sofort einen passenden Beat oder eine Tonleiter-Melodie inkl. Pitch-/Cutoff-Motion für den aktuellen Part.
-* **`KEYB` + BLECH Notenassistent:** Spielt den aktiven Part chromatisch über die 16 Pads; beleuchtet Tonleiter-Noten farbig und den Grundton in **Neon-Pink**.
-* **`BEAT 8` Modus (`BEAT 16` <-> `BEAT 8`):** Jeder Step wird zur Achtelnote – das Pattern läuft doppelt so lang (bei 160 BPM wie bei 80 BPM).
-* **`BLECH DISPLAY/LED` Theme-Farben + Pinke Poly-Steps:** Wechselbare Display- und Pad-LED-Farben (`BLECH CYAN`, `NEON PINK`, `MATRIX GRÜN`, `AMBER GOLD`, `BLECH VIOLET`) sowie Synth-Steps in Pink.
-* **Blechy als kleines Haustier:** Das kleine Pixel-Haustier `Blechy` (`(^._.^)` / `(\^o^/)`) tanzt oben rechts im OLED-Display im Takt mit.
-* **`TUBE` (VALVE FORCE Röhren-Sättigung)**, **`MOT.SEQ` (Motion Sequence)** sowie **`ACCENT`** (+40 % Punch) und **`ROLL`** (3x Ratchet Drum-Rolls).
+* **Durchlaufende Lieder & Loops (`+ SONG` / `+ SONG LOOP`):** Importiere komplette Songs oder Loops (`.wav`, `.mp3`, `.m4a`, `.ogg` bis 3 Minuten), die nahtlos im Hintergrund durchlaufen, während du live eigene Kicks, Snares und Hi-Hats auf den Pads 1–15 dazuspielst oder im Sequencer programmierst.
+* **Eigene Kicks & One-Shot Samples (`+ KICK` / `-> TASTE`):** Lade eigene Kick- oder Drum-Samples direkt vom Gerät (oder ziehe sie unter Windows per **Drag & Drop** auf ein Pad) und lege sie frei auf jede beliebige der **16 Tasten (Pads 1–16)**.
+* **26 integrierte Drum-, Synth- & Blechtribe-Oszillatoren:** Von `BD 909 PUNCH`, `SUBWOOFER 808`, `EMX TRIBE KICK`, `SD ANALOG`, `EMX HARD SNARE`, `HAND CLAP`, `CLOSED/OPEN HH` bis hin zu `ACID SAW 303`, `EMX ACID 303`, `EMX HOOVER`, `EMX SUPERSAW`, `EMX FM DONK`, `PCM ORCH HIT`, `PCM CHOIR AAH`, `SUB BASS` und `DUAL SAW LEAD`.
 
 ---
 
-## 📱 Als App auf iPhone / iPad installieren
-1. Öffne die GitHub-Pages-URL in **Safari** auf deinem iPhone oder iPad.
-2. Tippe auf **Teilen** → **„Zum Home-Bildschirm“**.
-3. Starte **BeatForge XS2** vom Home-Bildschirm im Vollbildmodus!
+### 🔵 2. BeatForge XT-2 Modus (Blauer Drum- & Synth-Creator)
+Per Klick auf **`XT2 BLAU`** (oder Taste **`[B]`** auf Windows) wechselt das Gehäuse in den blauen Synthesizer-Modus, in dem du eigene Kicks, Snares, Claps, Hi-Hats und Acid-Bässe von Grund auf selbst bauen kannst:
+* **10 Synthese-Modelle (`◄ DRUM TYP ►`):**
+  * `EMX BLECHTRIBE BD` – Druckvoller Metall-Tribe-Kick mit 2.-Harmonischer Röhrenfaltung
+  * `909 PUNCH KICK` – Klassischer Techno-/House-Kick
+  * `HARDTEK / GABBER` – Brachialer Tekno-/Hardstyle-Kick mit Oberton-Verzerrung
+  * `808 SUB BOOM` – Tiefer 808-Subbass-Kick
+  * `ANALOG SNARE` – Warme analoge Snare mit einstellbarem Teppich
+  * `CRISP / TRAP SD` – Knackige 909-/Trap-Snare
+  * `CLUB CLAP` – Mehrfach geschichteter Club-Clap
+  * `METAL HI-HAT` – Metallische Synthesizer-Hi-Hat
+  * `FM DONK BASS` – FM-/Donk-Bass
+  * `303 ACID SCREAM` – Kreischender 303-Acid-Synth mit Resonanz-Envelope
+* **Echtzeit-Synthese-Regler:**
+  * `TUNE / SUB` (Grundfrequenz & Subbass)
+  * `SWEEP DROP` (Pitch-Kick-Punch & Drop-Tiefe)
+  * `CLICK / SNAP` (Attack-Transient & Anschlag)
+  * `SNAPPY / NOISE` (Snare-Teppich, Rauschen & Obertöne)
+  * `OVERDRIVE` (Analoge Sättigung bis Gabber-Distortion)
+  * `LENGTH` (Ausklang-Länge)
+* **Direkt auf Tasten speichern (`AUF TASTE ->` / `-> TASTE`):** Jeden selbstgebauten Sound mit einem Tipp auf jedes beliebige Pad (1–16) legen.
+
+---
+
+### 🔥 3. BLECHTRIBE Edition (BLECH 1.4.0 + EMX/ESX + Hacktribe Features)
+Alle Kult-Funktionen aus **BLECHTRIBE v1.4.0** sowie den Röhren-Electribes:
+* **`🎲 DICE` (Melodie- & Beat-Generator / Würfeln):** Ein Klick auf `🎲 DICE` (oder Taste **`[D]`**) würfelt für den ausgewählten Part sofort einen passenden Beat (Four-on-the-floor + Offbeats bei Kicks/Drums) oder eine **Tonleiter-Melodie inkl. Pitch- & Filter-Cutoff-Motion** (bei Synths/303).
+* **`KEYB` + BLECH Notenassistent:** Spielt den aktiven Part chromatisch über die 16 Pads; der BLECH-Notenassistent beleuchtet automatisch alle Tasten, die in der gewählten Tonleiter (`SCALE`) liegen, farbig und markiert den **Grundton (Pad 1 & 13) in Neon-Pink**.
+* **`BEAT 8` Modus (`BEAT 16` <-> `BEAT 8`):** Jeder Step im Pattern wird zur Achtelnote statt Sechzehntelnote – das Pattern läuft doppelt so lang (bei 160 BPM wie bei 80 BPM), während die BPM-Uhr gleich bleibt.
+* **`BLECH DISPLAY/LED` Theme-Farben + Pinke Poly-Steps:** Über `◄ MENU ►` lassen sich die OLED-Display- und Pad-LED-Farben frei umschalten (`BLECH CYAN`, `NEON PINK`, `MATRIX GRÜN`, `AMBER GOLD`, `BLECH VIOLET`). Gesetzte Steps von Synth-/Poly-Parts leuchten im Sequencer originalgetreu in **Pink**.
+* **Blechy als kleines Haustier:** Oben rechts im OLED-Display sitzt das kleine Pixel-Haustier **`Blechy`** (`(^._.^)` / `(\^o^/)` / `(^o_o^)`) und tanzt im Takt der Musik mit.
+* **`TUBE` – VALVE FORCE (Dual 12AX7 Röhren-Sättigung):** Asymmetrische Röhren-Übersteuerung & analoger Bass-Boost (0–100 %) auf der Master-Summe für maximalen Tekno-/Tribe-Druck.
+* **`MOT.SEQ` (Motion Sequence):** Zeichne Regler-Bewegungen (`CUTOFF` & `PITCH`) pro Step live während der Wiedergabe auf und lass Filter-Sweeps automatisch im Loop abspielen.
+* **`ACCENT` & `ROLL` Step-Modi:** `+40 %` mehr Punch auf betonten Steps (`ACCENT`) sowie 3-fache Ratchet-Substeps (`ROLL`) für typische EMX/ESX Drum-Wirbel.
+
+---
+
+### 🎹 4. FL Studio Integration (`🎹 FL MIDI`, `📤 FL .MID`, `💿 FL .WAV`)
+Direkte Anbindung an **FL Studio** auf Windows (WebMIDI / *loopMIDI*) und Android (USB-MIDI):
+* **`🎹 FL MIDI` (Live MIDI Out / In / Clock Sync):**
+  * **Live-Noten:** Alle 16 Pads, der Step-Sequencer, der **`🎲 DICE`-Generator**, **`ROLL`-Substeps** und das **`KEYB`-Keyboard** senden Echtzeit-MIDI-Noten an FL Studio (Drums auf MIDI-Kanal 10 für *FPC* / Channel Rack, Synths/303 chromatisch auf Kanal 1–16 für die *Piano Roll*).
+  * **Live-Drehregler (`Link to controller`):** Alle 10 Drehregler (`CUTOFF` CC 74, `RESONANCE` CC 71, `PITCH` CC 16, `DECAY` CC 72, `ATTACK` CC 73, `LEVEL` CC 7 usw.) senden MIDI-CC-Befehle an FL Studio.
+  * **MIDI Clock Sync:** Startet/stoppt synchron mit FL Studio und übernimmt automatisch das FL-Studio-Tempo.
+* **`📤 FL .MID` (1-Klick Piano-Roll-Export):**
+  * Exportiert das aktuelle Pattern (inkl. `🎲 DICE`-Melodien, Accents, 3x-Ratchet-Rolls, Pitch-Motion & Cutoff-Automation) als `.mid`-Datei zum direkten Reinziehen in die **FL Studio Piano Roll**.
+* **`💿 FL .WAV` (1-Klick Audio-Export):**
+  * Exportiert den selbstgebauten **XT-2 / BLECHTRIBE Sound** oder Sample-Slot sofort als **16-Bit 44.1 kHz `.wav`-Datei** für die **FL Studio Playlist** oder den Sampler.
+
+---
+
+### 🖥️ 5. Windows Desktop & PC-Optimierung
+Speziell für Windows 10/11 optimierte Steuerung:
+* **Eigenständiger Windows-App-Starter (`Start_BeatForge_Windows.bat`):** Startet die Groovebox per Doppelklick als rahmenloses Desktop-Anwendungsfenster (`1440×860`).
+* **PC-Tastatursteuerung (Live-Drumming & Shortcuts):**
+  * **`[LEERTASTE]`** – Play / Stop
+  * **`[1]` bis `[8]`** – Pads 1–8 direkt spielen / Steps setzen / Muten
+  * **`[Q] [W] [E] [R] [T] [Z/Y] [U] [I]`** – Pads 9–16 direkt spielen / Steps setzen / Muten
+  * **`[M]`** – MUTE-Modus an/aus (`[Shift + M]` = Aktiven Part / Alle 16 Parts sofort entstummen)
+  * **`[S]` / `[K]` / `[A]` / `[L]`** – Wechsel zwischen `SEQ`, `KEYB`, `ACCENT` und `ROLL`
+  * **`[D]`** – `🎲 DICE` (Neuen Beat oder Synth-Melodie würfeln)
+  * **`[B]`** – Wechsel zwischen Roter `XS-2` und Blauer `XT-2`
+  * **`[N]`** – Wechsel zwischen `BEAT 16` und `BEAT 8`
+  * **`[Pfeiltasten ◄ / ►]`** – Spur wechseln (`PART 1–16`)
+  * **`[Pfeiltasten ▲ / ▼]`** – `VALUE`-Encoder drehen (Oszillator / BPM / Scale / Tube / BLECH-Farbe)
+  * **`[F]` oder `[F11]`** – Vollbildmodus umschalten
+* **Mausrad & Doppelklick auf allen 10 Drehreglern + VALUE-Encoder:**
+  * Mit dem **Mausrad** über jedem Regler fein verstellen (mit gehaltener `Shift`-Taste im Ultra-Feinmodus).
+  * **Doppelklick** auf einen Regler setzt ihn sofort auf die Mittel-/Standardstellung zurück.
+* **Windows-Explorer Drag & Drop:**
+  * Ziehe beliebige `.wav`, `.mp3`, `.ogg` oder `.flac` Dateien direkt aus dem Windows-Explorer auf **Pad 1–16**, um sie sofort auf genau dieses Pad zu laden!
+
+---
+
+## 📱 Installation & Nutzung
+
+### 🖥️ Auf Windows 10 / 11 (Desktop-App)
+1. Doppelklicke im Projektordner auf **[`Start_BeatForge_Windows.bat`](./Start_BeatForge_Windows.bat)**.
+2. Die Groovebox öffnet sich sofort als eigenständiges Windows-App-Fenster mit voller PC-Tastatur-, Mausrad-, Drag-&-Drop- und FL-Studio-Unterstützung.
+
+### 🍎 Auf iPhone & iPad (iOS Web-App / PWA)
+1. Öffne den **GitHub Pages Link** dieses Projekts in **Safari** auf deinem iPhone oder iPad.
+2. Tippe unten in Safari auf das **Teilen-Symbol** (Quadrat mit Pfeil nach oben).
+3. Wähle **„Zum Home-Bildschirm“** (*Add to Home Screen*).
+4. Starte **BeatForge XS2** vom Home-Bildschirm – die App läuft komplett im **Vollbildmodus (Querformat)** wie eine native App!
+
+### 🤖 Auf Android (APK)
+1. Lade die Datei **[`BeatForge_XS2_Sampler.apk`](./BeatForge_XS2_Sampler.apk)** herunter.
+2. Öffne die APK-Datei auf deinem Android-Gerät und bestätige **Installieren**.
+
+---
+
+## 🛠️ Projektstruktur
+* `Start_BeatForge_Windows.bat` – Windows-Desktop-Starter (öffnet die App im nativen App-Fenster).
+* `ios_webapp/index.html`, `ios_webapp/manifest.json` & `ios_webapp/icon.svg` – Komplette Windows-, iOS- & Web-Version (HTML5 + WebAudio + WebMIDI PWA).
+* `app/src/main/java/com/example/es2korg/MainActivity.kt` – Native Android Jetpack Compose Hardware-UI + USB-MIDI.
+* `app/src/main/java/com/example/es2korg/ElectribeAudioEngine.kt` – Echtzeit-Polyphonie-Synthesizer, Drum-Creator, Valve-Force-Tube, MIDI-Exporter & Sampler-Engine (44.1 kHz PCM).
+* `BeatForge_XS2_Sampler.apk` – Fertige Android-Installationsdatei.

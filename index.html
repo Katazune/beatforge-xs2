@@ -381,8 +381,76 @@
       color: #888888;
       z-index: 1;
     }
+    .rubber-pad .pad-key {
+      display: none;
+      position: absolute;
+      top: 3px;
+      right: 5px;
+      font-size: 8px;
+      font-family: monospace;
+      color: rgba(255,255,255,0.45);
+      background: rgba(0,0,0,0.45);
+      padding: 0 3px;
+      border-radius: 3px;
+    }
+    .rubber-pad.drag-over {
+      border-color: #4ADE80 !important;
+      box-shadow: 0 0 14px #4ADE80 !important;
+    }
     .rubber-pad.lit .pad-num { color: #FFFFFF; }
     .rubber-pad.lit .pad-sub { color: #EEEEEE; }
+
+    .pc-hotkey-bar {
+      display: none;
+      justify-content: space-between;
+      align-items: center;
+      font-family: monospace;
+      font-size: 10px;
+      color: rgba(255, 220, 225, 0.82);
+      background: rgba(0, 0, 0, 0.38);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 5px;
+      padding: 3px 10px;
+      margin-top: 2px;
+      flex-shrink: 0;
+    }
+    .pc-hotkey-bar b {
+      color: #FFD166;
+    }
+
+    /* WINDOWS & DESKTOP WIDESCREEN OPTIMIZATION */
+    @media (min-width: 900px) and (min-height: 540px) {
+      .chassis {
+        max-width: 1480px;
+        max-height: 900px;
+        padding: 16px 24px;
+        border-width: 2px;
+        border-radius: 20px;
+      }
+      .header { height: 32px; }
+      .header-step { font-size: 13px; letter-spacing: 0.5px; }
+      .es2-badge { font-size: 11px; padding: 3px 8px; }
+      .korg-logo { font-size: 23px; }
+      .oled { padding: 8px 12px; border-radius: 6px; }
+      .oled-row1 { font-size: 14px; }
+      .oled-row2 { font-size: 12px; margin-top: 4px; }
+      .hw-btn { height: 30px; font-size: 10.5px; border-radius: 4px; }
+      .hw-btn:hover, .fn-btn:hover { filter: brightness(1.22); border-color: rgba(255,255,255,0.45); }
+      .knob-group { font-size: 8.5px; }
+      .knob-circle { width: 52px; height: 52px; margin: 4px 0; }
+      .knob-title { font-size: 9.5px; }
+      .value-knob { width: 74px; height: 74px; }
+      .value-label { font-size: 10px; margin-top: 4px; }
+      .fn-btn { padding: 6px 11px; font-size: 10.5px; }
+      .part-indicator { font-size: 13px; }
+      .pads-section { gap: 8px; }
+      .pads-row { gap: 9px; }
+      .rubber-pad { height: 68px; border-radius: 8px; }
+      .rubber-pad .pad-num { font-size: 14px; }
+      .rubber-pad .pad-sub { font-size: 9.5px; margin-top: 2px; }
+      .rubber-pad .pad-key { display: block; }
+      .pc-hotkey-bar { display: flex; }
+    }
   </style>
 </head>
 <body>
@@ -494,6 +562,9 @@
         <div class="fn-btn" id="btnRec">● REC</div>
         <div class="fn-btn" id="btnKickToPad">+ KICK -> PAD</div>
         <div class="fn-btn" id="btnSongLoop">+ SONG LOOP</div>
+        <div class="fn-btn" id="btnFlMidi" title="FL Studio Live MIDI (WebMIDI / loopMIDI)">🎹 FL MIDI</div>
+        <div class="fn-btn" id="btnFlExportMid" title="Exportiert das aktuelle Pattern als .MID Datei für die FL Studio Piano Roll">📤 FL .MID</div>
+        <div class="fn-btn" id="btnFlExportWav" title="Exportiert den Sound oder 16-Step-Loop als .WAV Datei für die FL Studio Playlist">💿 FL .WAV</div>
       </div>
       <div class="part-indicator" id="partFooter">PART 1</div>
     </div>
@@ -502,6 +573,12 @@
     <div class="pads-section">
       <div class="pads-row" id="padsRow1"></div>
       <div class="pads-row" id="padsRow2"></div>
+    </div>
+
+    <!-- WINDOWS / PC KEYBOARD & MOUSE HOTKEY BAR -->
+    <div class="pc-hotkey-bar">
+      <span><b>[LEERTASTE]</b> Play/Stop • <b>[1-8 &amp; Q-I]</b> Pads 1-16 • <b>[M]</b> Mute • <b>[Shift+M]</b> Unmute All • <b>[S]</b> Seq • <b>[K]</b> Keyb • <b>[D]</b> 🎲 Dice • <b>[B]</b> XT2 Blau</span>
+      <span><b>[Mausrad]</b> Regler fein • <b>[Doppelklick]</b> Reset • <b>[Drag &amp; Drop]</b> WAV/MP3 auf Pad ziehen • <b id="btnFullscreen" style="cursor:pointer;text-decoration:underline;">[F11 Vollbild]</b></span>
     </div>
   </div>
 
@@ -524,12 +601,16 @@
       { name: "MINOR CHORD", cat: "SYNTH" },
       { name: "ZAP LASER", cat: "FX" },
       { name: "SONG / LOOP", cat: "SAMPLE" },
-      { name: "BD 808 SUB", cat: "DRUM" },
-      { name: "FM BELL", cat: "SYNTH" },
+      { name: "PCM ORCH HIT", cat: "SAMPLE" },
+      { name: "PCM CHOIR AAH", cat: "SAMPLE" },
+      { name: "RISER NOISE FX", cat: "FX" },
+      { name: "SUBWOOFER 808", cat: "DRUM" },
       { name: "EMX TRIBE KICK", cat: "BLECHTRIBE" },
-      { name: "ACID SCREAM 303", cat: "BLECHTRIBE" },
-      { name: "HOOVER RAVE LD", cat: "BLECHTRIBE" },
-      { name: "VOCAL FORMANT", cat: "BLECHTRIBE" }
+      { name: "EMX ACID 303", cat: "BLECHTRIBE" },
+      { name: "EMX HOOVER", cat: "BLECHTRIBE" },
+      { name: "EMX SUPERSAW", cat: "BLECHTRIBE" },
+      { name: "EMX HARD SNARE", cat: "BLECHTRIBE" },
+      { name: "EMX FM DONK", cat: "BLECHTRIBE" }
     ];
 
     const FILTER_TYPES = ["LPF", "HPF", "BPF", "OFF"];
@@ -691,6 +772,7 @@
     let audioCtx = null;
     let masterFilter = null;
     let tubeShaper = null;
+    let masterComp = null;
     let masterGain = null;
 
     function makeTubeCurve(amount) {
@@ -720,10 +802,17 @@
         tubeShaper = audioCtx.createWaveShaper();
         tubeShaper.curve = makeTubeCurve(valveForceTube);
         tubeShaper.oversample = "2x";
+        masterComp = audioCtx.createDynamicsCompressor();
+        masterComp.threshold.value = -10;
+        masterComp.knee.value = 8;
+        masterComp.ratio.value = 4;
+        masterComp.attack.value = 0.003;
+        masterComp.release.value = 0.12;
         masterGain = audioCtx.createGain();
-        masterGain.gain.value = 0.9;
+        masterGain.gain.value = 1.25;
         masterFilter.connect(tubeShaper);
-        tubeShaper.connect(masterGain);
+        tubeShaper.connect(masterComp);
+        masterComp.connect(masterGain);
         masterGain.connect(audioCtx.destination);
       }
       if (audioCtx.state === "suspended") {
@@ -751,6 +840,9 @@
       const part = parts[partId - 1];
       if (!part || part.isMuted) return;
 
+      // Send Live MIDI Note to FL Studio if WebMIDI is connected
+      sendFlMidiNote(part, velocity, semitoneOffset);
+
       const now = audioCtx.currentTime;
       const totalSemi = ((part.pitchGlide - 0.5) * 24) + semitoneOffset;
       const pitchMul = Math.pow(2, totalSemi / 12);
@@ -773,7 +865,7 @@
         }
 
         const gain = audioCtx.createGain();
-        gain.gain.value = part.level * velocity;
+        gain.gain.value = Math.min(1.6, part.level * velocity * 1.28);
 
         src.connect(flt);
         flt.connect(gain);
@@ -788,34 +880,49 @@
         return;
       }
 
-      // Built-in Synth & Drum Engine (909 Kick, Snare, Hats, 303 Acid, etc.)
+      // Built-in Synth & Drum Engine (26 Presets incl. BLECHTRIBE EMX Engine)
       const gain = audioCtx.createGain();
       const flt = audioCtx.createBiquadFilter();
       flt.type = part.filterType === "HPF" ? "highpass" : part.filterType === "BPF" ? "bandpass" : "lowpass";
-      flt.frequency.setValueAtTime(80 + part.cutoff * part.cutoff * 10000, now);
-      flt.Q.value = 0.7 + part.resonance * 10;
+      const baseCutFreq = 80 + part.cutoff * part.cutoff * 10500;
+      const egBoost = Math.max(0, (part.egInt - 0.5) * 2) * 5500;
+      flt.frequency.setValueAtTime(Math.min(18000, baseCutFreq + egBoost), now);
+      if (egBoost > 50) {
+        flt.frequency.exponentialRampToValueAtTime(Math.max(60, baseCutFreq), now + 0.14);
+      }
+      flt.Q.value = 0.7 + part.resonance * 11;
 
-      const decaySec = 0.08 + part.decay * 0.55;
-      gain.gain.setValueAtTime(part.level * velocity, now);
+      const decaySec = 0.09 + part.decay * 0.58;
+      gain.gain.setValueAtTime(Math.min(1.6, part.level * velocity * 1.28), now);
       gain.gain.exponentialRampToValueAtTime(0.001, now + decaySec);
 
       flt.connect(gain);
       gain.connect(masterFilter);
 
       const oscIdx = part.oscIndex;
-      if (oscIdx === 0 || oscIdx === 16 || oscIdx === 6 || oscIdx === 7) {
-        // 909 / 808 Kick & Toms
+      if (oscIdx === 0 || oscIdx === 19 || oscIdx === 20 || oscIdx === 6 || oscIdx === 7) {
+        // 909 Kick (0), Subwoofer 808 (19), EMX Tribe Kick (20), Low/Hi Toms (6, 7)
         const osc = audioCtx.createOscillator();
-        osc.type = "sine";
-        const startFreq = (oscIdx === 0 ? 155 : oscIdx === 16 ? 120 : oscIdx === 6 ? 130 : 200) * pitchMul;
-        const endFreq = (oscIdx === 16 ? 38 : 48) * pitchMul;
+        osc.type = oscIdx === 20 ? "triangle" : "sine";
+        const startFreq = (oscIdx === 20 ? 220 : oscIdx === 0 ? 165 : oscIdx === 19 ? 115 : oscIdx === 6 ? 130 : 200) * pitchMul;
+        const endFreq = (oscIdx === 19 ? 36 : oscIdx === 20 ? 46 : 48) * pitchMul;
         osc.frequency.setValueAtTime(startFreq, now);
-        osc.frequency.exponentialRampToValueAtTime(Math.max(25, endFreq), now + 0.09);
+        osc.frequency.exponentialRampToValueAtTime(Math.max(25, endFreq), now + (oscIdx === 20 ? 0.065 : 0.09));
         osc.connect(flt);
         osc.start(now);
         osc.stop(now + decaySec);
-      } else if (oscIdx === 1 || oscIdx === 2 || oscIdx === 3 || oscIdx === 4 || oscIdx === 8 || oscIdx === 9) {
-        // Snare, Clap, Hi-Hats, Shaker, Crash (Noise + Tone)
+        if (oscIdx === 20) {
+          // EMX Tribe Kick punch harmonic
+          const sub = audioCtx.createOscillator();
+          sub.type = "sine";
+          sub.frequency.setValueAtTime(startFreq * 0.5, now);
+          sub.frequency.exponentialRampToValueAtTime(Math.max(25, endFreq), now + 0.08);
+          sub.connect(flt);
+          sub.start(now);
+          sub.stop(now + decaySec);
+        }
+      } else if (oscIdx === 1 || oscIdx === 2 || oscIdx === 3 || oscIdx === 4 || oscIdx === 5 || oscIdx === 8 || oscIdx === 9 || oscIdx === 18 || oscIdx === 24) {
+        // Snare (1), Clap (2), Hats (3,4), Rim (5), Shaker (8), Crash (9), Riser (18), EMX Hard Snare (24)
         const bufSize = Math.floor(audioCtx.sampleRate * decaySec);
         const noiseBuf = audioCtx.createBuffer(1, bufSize, audioCtx.sampleRate);
         const data = noiseBuf.getChannelData(0);
@@ -824,21 +931,41 @@
         noise.buffer = noiseBuf;
         noise.connect(flt);
         noise.start(now);
-        if (oscIdx === 1) {
+        if (oscIdx === 1 || oscIdx === 5 || oscIdx === 24) {
           const body = audioCtx.createOscillator();
-          body.type = "triangle";
-          body.frequency.setValueAtTime(185 * pitchMul, now);
-          body.frequency.exponentialRampToValueAtTime(95 * pitchMul, now + 0.08);
+          body.type = oscIdx === 24 ? "sawtooth" : "triangle";
+          body.frequency.setValueAtTime((oscIdx === 5 ? 420 : oscIdx === 24 ? 230 : 185) * pitchMul, now);
+          body.frequency.exponentialRampToValueAtTime((oscIdx === 5 ? 180 : 95) * pitchMul, now + 0.08);
           body.connect(flt);
           body.start(now);
           body.stop(now + decaySec);
         }
+      } else if (oscIdx === 12 || oscIdx === 13 || oscIdx === 16 || oscIdx === 17 || oscIdx === 22 || oscIdx === 23) {
+        // Dual Saw (12), Minor Chord (13), Orch Hit (16), Choir (17), EMX Hoover (22), EMX Supersaw (23)
+        const baseFreq = (oscIdx === 22 ? 110 : 130.81) * pitchMul;
+        const ratios = oscIdx === 13 || oscIdx === 16 ? [1, 1.1892, 1.4983] : [0.992, 1.008, 1.5];
+        ratios.forEach(r => {
+          const osc = audioCtx.createOscillator();
+          osc.type = oscIdx === 17 ? "triangle" : "sawtooth";
+          osc.frequency.setValueAtTime(baseFreq * r, now);
+          osc.connect(flt);
+          osc.start(now);
+          osc.stop(now + decaySec);
+        });
       } else {
-        // Acid Saw 303, Sub Bass, Leads, Chords
+        // Acid Saw 303 (10), Sub Bass (11), Zap Laser (14), EMX Acid 303 (21), EMX FM Donk (25)
         const osc = audioCtx.createOscillator();
-        osc.type = (oscIdx === 11) ? "sine" : "sawtooth";
-        const baseFreq = (oscIdx === 11 ? 65.41 : oscIdx === 10 ? 110 : 220) * pitchMul;
-        osc.frequency.setValueAtTime(baseFreq, now);
+        osc.type = (oscIdx === 11 || oscIdx === 25) ? "sine" : "sawtooth";
+        const baseFreq = (oscIdx === 11 ? 65.41 : oscIdx === 10 || oscIdx === 21 ? 82.41 : oscIdx === 25 ? 98 : 220) * pitchMul;
+        if (oscIdx === 14) {
+          osc.frequency.setValueAtTime(980 * pitchMul, now);
+          osc.frequency.exponentialRampToValueAtTime(55 * pitchMul, now + 0.14);
+        } else if (oscIdx === 25) {
+          osc.frequency.setValueAtTime(baseFreq * 2.8, now);
+          osc.frequency.exponentialRampToValueAtTime(baseFreq, now + 0.055);
+        } else {
+          osc.frequency.setValueAtTime(baseFreq, now);
+        }
         osc.connect(flt);
         osc.start(now);
         osc.stop(now + decaySec);
@@ -914,6 +1041,33 @@
       { group: "AMP / IFX", title: "LEVEL", key: "level" }
     ];
 
+    const KNOB_DEFAULTS = {
+      pitchGlide: 0.5, oscEdit: 0.2, cutoff: 0.78, resonance: 0.20, egInt: 0.5,
+      modSpeed: 0.35, modDepth: 0.20, attack: 0.0, decay: 0.48, level: 0.85
+    };
+
+    function applyKnobValue(spec, nextVal, previewE2 = false) {
+      const clamped = Math.max(0, Math.min(1, nextVal));
+      const activeP = parts[selectedPartId - 1];
+      activeP[spec.key] = clamped;
+      if (activeP.motionSeqMode === "REC") {
+        if (spec.key === "cutoff") activeP.motionCutoff[currentStep - 1] = clamped;
+        if (spec.key === "pitchGlide") activeP.motionPitch[currentStep - 1] = clamped;
+      }
+      if (isBlueE2Mode) {
+        if (spec.key === "pitchGlide") e2Params.tune = clamped;
+        else if (spec.key === "oscEdit") e2Params.sweep = clamped;
+        else if (spec.key === "attack") e2Params.click = clamped;
+        else if (spec.key === "modDepth") e2Params.snappy = clamped;
+        else if (spec.key === "egInt") e2Params.drive = clamped;
+        else if (spec.key === "decay") e2Params.decay = clamped;
+        bakeE2DrumToPart(selectedPartId, previewE2);
+      }
+      sendFlMidiCC(spec.key, clamped);
+      displayNotice = `${spec.title}: ${Math.round(clamped * 127)}`;
+      renderUI();
+    }
+
     function createKnobRow(containerId, specs) {
       const container = document.getElementById(containerId);
       specs.forEach(spec => {
@@ -921,7 +1075,7 @@
         wrap.className = "knob-wrap";
         wrap.innerHTML = `
           <div class="knob-group">${spec.group}</div>
-          <div class="knob-circle" data-key="${spec.key}">
+          <div class="knob-circle" data-key="${spec.key}" title="Mausrad: Verstellen | Doppelklick: Reset">
             <div class="knob-indicator" id="ind_${spec.key}"></div>
           </div>
           <div class="knob-title">${spec.title}</div>
@@ -937,27 +1091,23 @@
         circle.addEventListener("pointermove", e => {
           if (!circle.hasPointerCapture(e.pointerId)) return;
           const dy = startY - e.clientY;
-          const nextVal = Math.max(0, Math.min(1, startVal + dy / 90));
-          const activeP = parts[selectedPartId - 1];
-          activeP[spec.key] = nextVal;
-          if (activeP.motionSeqMode === "REC") {
-            if (spec.key === "cutoff") activeP.motionCutoff[currentStep - 1] = nextVal;
-            if (spec.key === "pitchGlide") activeP.motionPitch[currentStep - 1] = nextVal;
-          }
-          if (isBlueE2Mode) {
-            if (spec.key === "pitchGlide") e2Params.tune = nextVal;
-            else if (spec.key === "oscEdit") e2Params.sweep = nextVal;
-            else if (spec.key === "attack") e2Params.click = nextVal;
-            else if (spec.key === "modDepth") e2Params.snappy = nextVal;
-            else if (spec.key === "egInt") e2Params.drive = nextVal;
-            else if (spec.key === "decay") e2Params.decay = nextVal;
-            bakeE2DrumToPart(selectedPartId, false);
-          }
-          displayNotice = `${spec.title}: ${Math.round(nextVal * 127)}`;
-          renderUI();
+          applyKnobValue(spec, startVal + dy / 90, false);
         });
         circle.addEventListener("pointerup", () => {
           if (isBlueE2Mode) triggerPart(selectedPartId, 0.95);
+        });
+        // Windows Mouse Wheel support
+        circle.addEventListener("wheel", e => {
+          e.preventDefault();
+          const step = e.shiftKey ? 0.008 : 0.025;
+          const dir = e.deltaY < 0 ? 1 : -1;
+          applyKnobValue(spec, parts[selectedPartId - 1][spec.key] + dir * step, false);
+        }, { passive: false });
+        // Windows Double-Click Reset
+        circle.addEventListener("dblclick", () => {
+          applyKnobValue(spec, KNOB_DEFAULTS[spec.key] ?? 0.5, true);
+          displayNotice = `${spec.title}: RESET`;
+          renderUI();
         });
         container.appendChild(wrap);
       });
@@ -965,7 +1115,8 @@
     createKnobRow("knobRowTop", TOP_KNOBS);
     createKnobRow("knobRowBottom", BOT_KNOBS);
 
-    // --- 16 PADS CREATION ---
+    // --- 16 PADS CREATION (WITH PC KEYBOARD LABELS & DRAG-AND-DROP) ---
+    const PAD_KEY_LABELS = ["1","2","3","4","5","6","7","8","Q","W","E","R","T","Z","U","I"];
     function createPads() {
       const r1 = document.getElementById("padsRow1");
       const r2 = document.getElementById("padsRow2");
@@ -973,8 +1124,39 @@
         const pad = document.createElement("div");
         pad.className = "rubber-pad";
         pad.id = `pad_${i}`;
-        pad.innerHTML = `<div class="pad-num">${i}</div><div class="pad-sub" id="padsub_${i}"></div>`;
+        pad.title = `Pad ${i} (Taste [${PAD_KEY_LABELS[i - 1]}] oder WAV/MP3 hierher ziehen)`;
+        pad.innerHTML = `<span class="pad-key">${PAD_KEY_LABELS[i - 1]}</span><div class="pad-num">${i}</div><div class="pad-sub" id="padsub_${i}"></div>`;
         pad.addEventListener("pointerdown", () => handlePadTap(i));
+        pad.addEventListener("dragover", e => {
+          e.preventDefault();
+          pad.classList.add("drag-over");
+        });
+        pad.addEventListener("dragleave", () => pad.classList.remove("drag-over"));
+        pad.addEventListener("drop", async e => {
+          e.preventDefault();
+          pad.classList.remove("drag-over");
+          const file = e.dataTransfer?.files?.[0];
+          if (!file) return;
+          displayNotice = `LADE ${file.name.toUpperCase()} AUF PAD ${i}...`;
+          renderUI();
+          try {
+            const audioBuf = await decodeAudioFile(file);
+            lastLoadedKickBuffer = audioBuf;
+            const p = parts[i - 1];
+            p.audioBuffer = audioBuf;
+            p.hasCustomSample = true;
+            p.loopSample = audioBuf.duration > 6.0;
+            p.name = file.name.replace(/\.[^/.]+$/, "").slice(0, 10).toUpperCase();
+            p.category = p.loopSample ? "USER SONG" : "USER KICK";
+            p.isMuted = false;
+            selectedPartId = i;
+            triggerPart(i, 1.0);
+            displayNotice = `DRAG & DROP: "${p.name}" AUF PAD ${i} GELADEN!`;
+          } catch (_) {
+            displayNotice = "AUDIO FORMAT FEHLER BEIM DRAG & DROP";
+          }
+          renderUI();
+        });
         (i <= 8 ? r1 : r2).appendChild(pad);
       }
     }
@@ -1308,7 +1490,7 @@
       }
     };
 
-    // Large VALUE Encoder drag gesture
+    // Large VALUE Encoder drag gesture + Windows Mouse Wheel
     const valueKnobEl = document.getElementById("valueKnob");
     let valStartY = 0;
     let valAngle = 180;
@@ -1325,6 +1507,71 @@
         valAngle = (valAngle + steps * 22) % 360;
         document.getElementById("valueIndicator").style.transform = `translate(-50%, 0) rotate(${valAngle}deg)`;
         stepValueEncoder(steps);
+      }
+    });
+    valueKnobEl.addEventListener("wheel", e => {
+      e.preventDefault();
+      const steps = e.deltaY < 0 ? 1 : -1;
+      valAngle = (valAngle + steps * 22) % 360;
+      document.getElementById("valueIndicator").style.transform = `translate(-50%, 0) rotate(${valAngle}deg)`;
+      stepValueEncoder(steps);
+    }, { passive: false });
+
+    // Fullscreen button & Windows PC Keyboard Controller
+    const btnFs = document.getElementById("btnFullscreen");
+    if (btnFs) {
+      btnFs.onclick = () => {
+        if (!document.fullscreenElement) document.documentElement.requestFullscreen?.();
+        else document.exitFullscreen?.();
+      };
+    }
+
+    const KEY_TO_PAD = {
+      "1": 1, "2": 2, "3": 3, "4": 4, "5": 5, "6": 6, "7": 7, "8": 8,
+      "q": 9, "w": 10, "e": 11, "r": 12, "t": 13, "z": 14, "y": 14, "u": 15, "i": 16
+    };
+    window.addEventListener("keydown", e => {
+      if (e.repeat || e.ctrlKey || e.altKey || e.metaKey) return;
+      const k = e.key.toLowerCase();
+      if (e.code === "Space") {
+        e.preventDefault();
+        document.getElementById("btnPlay").click();
+      } else if (KEY_TO_PAD[k]) {
+        e.preventDefault();
+        handlePadTap(KEY_TO_PAD[k]);
+      } else if (k === "m") {
+        e.preventDefault();
+        if (e.shiftKey) document.getElementById("btnPtMute").click();
+        else document.getElementById("modeMute").click();
+      } else if (k === "s") {
+        document.getElementById("modeSeq").click();
+      } else if (k === "k") {
+        document.getElementById("modeKeyb").click();
+      } else if (k === "a") {
+        document.getElementById("modeAccent").click();
+      } else if (k === "l") {
+        document.getElementById("modeRoll").click();
+      } else if (k === "d") {
+        document.getElementById("btnDice").click();
+      } else if (k === "b") {
+        toggleBlueE2();
+      } else if (k === "n") {
+        document.getElementById("btnBeat8").click();
+      } else if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        document.getElementById("btnPrevPt").click();
+      } else if (e.key === "ArrowRight") {
+        e.preventDefault();
+        document.getElementById("btnNextPt").click();
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        stepValueEncoder(1);
+      } else if (e.key === "ArrowDown") {
+        e.preventDefault();
+        stepValueEncoder(-1);
+      } else if (k === "f") {
+        if (!document.fullscreenElement) document.documentElement.requestFullscreen?.();
+        else document.exitFullscreen?.();
       }
     });
 
@@ -1519,12 +1766,17 @@
       document.getElementById("btnRec").className = `fn-btn ${isRecording ? "active-rec" : ""}`;
       document.getElementById("btnKickToPad").className = `fn-btn ${isAssigningToPad ? "active-purple" : ""}`;
       document.getElementById("btnSongLoop").className = `fn-btn ${parts[15].hasCustomSample ? "active-green" : ""}`;
+      const flBtn = document.getElementById("btnFlMidi");
+      if (flBtn) {
+        flBtn.className = `fn-btn ${flMidiEnabled ? "active-amber" : ""}`;
+        flBtn.textContent = flMidiEnabled ? `🎹 FL:${flMidiOutName.slice(0, 8)}` : "🎹 FL MIDI";
+      }
 
       // 16 Pads
       for (let i = 1; i <= 16; i++) {
         const p = parts[i - 1];
         const padEl = document.getElementById(`pad_${i}`);
-        document.getElementById(`padsub_${i}`).textContent = p.name.slice(0, 7);
+        document.getElementById(`padsub_${i}`).textContent = p.isMuted ? "MUTED" : p.name.slice(0, 7);
         let color = "#282828";
         let lit = false;
         if (isAssigningToPad) {
@@ -1587,6 +1839,304 @@
       ctx.arc(px, py, 6, 0, Math.PI * 2);
       ctx.fill();
     }
+
+    // --- FL STUDIO BRIDGE: WEBMIDI (IN/OUT/CC/CLOCK) + .MID & .WAV EXPORT ---
+    let midiAccess = null;
+    let midiOutputs = [];
+    let midiOutIdx = 0;
+    let flMidiEnabled = false;
+    let flMidiOutName = "OFF";
+    let midiClockTicks = [];
+
+    const KNOB_TO_CC = {
+      pitchGlide: 16, oscEdit: 17, cutoff: 74, resonance: 71, egInt: 18,
+      modSpeed: 19, modDepth: 20, attack: 73, decay: 72, level: 7
+    };
+
+    function refreshMidiPorts() {
+      if (!midiAccess) return;
+      midiOutputs = Array.from(midiAccess.outputs.values());
+      Array.from(midiAccess.inputs.values()).forEach(input => {
+        input.onmidimessage = handleIncomingFlMidi;
+      });
+      if (midiOutputs.length > 0) {
+        if (midiOutIdx >= midiOutputs.length) midiOutIdx = 0;
+        flMidiOutName = midiOutputs[midiOutIdx].name || "MIDI OUT";
+      } else {
+        flMidiOutName = "NO PORT";
+      }
+    }
+
+    function handleIncomingFlMidi(ev) {
+      if (!flMidiEnabled || !ev.data || ev.data.length < 1) return;
+      const status = ev.data[0];
+      // MIDI Clock Sync from FL Studio
+      if (status === 0xFA || status === 0xFB) {
+        if (!isPlaying) startSequencer();
+        displayNotice = "FL STUDIO MIDI SYNC: START";
+        renderUI();
+        return;
+      }
+      if (status === 0xFC) {
+        if (isPlaying) stopSequencer();
+        displayNotice = "FL STUDIO MIDI SYNC: STOP";
+        renderUI();
+        return;
+      }
+      if (status === 0xF8) {
+        const now = performance.now();
+        midiClockTicks.push(now);
+        if (midiClockTicks.length > 25) midiClockTicks.shift();
+        if (midiClockTicks.length === 25) {
+          const elapsedMs = midiClockTicks[24] - midiClockTicks[0];
+          if (elapsedMs > 180 && elapsedMs < 1500) {
+            const detectedBpm = Math.round(60000 / elapsedMs);
+            if (Math.abs(detectedBpm - bpm) >= 1) {
+              bpm = Math.max(60, Math.min(240, detectedBpm));
+              renderUI();
+            }
+          }
+        }
+        return;
+      }
+      const cmd = status & 0xF0;
+      const ch = status & 0x0F;
+      const d1 = ev.data[1] || 0;
+      const d2 = ev.data[2] || 0;
+      if (cmd === 0x90 && d2 > 0) {
+        // Note On from FL Studio triggers Pads 1-16 (notes 36-51) or plays active part chromatically
+        if (d1 >= 36 && d1 <= 51 && ch === 9) {
+          triggerPart(d1 - 35, d2 / 127);
+        } else {
+          triggerPart(selectedPartId, d2 / 127, d1 - 60);
+        }
+      }
+    }
+
+    function sendFlMidiNote(part, velocity, semitoneOffset = 0) {
+      if (!flMidiEnabled || midiOutputs.length === 0) return;
+      const out = midiOutputs[midiOutIdx];
+      if (!out) return;
+      const vel127 = Math.max(1, Math.min(127, Math.round(velocity * 100)));
+      const isSynth = part.category.includes("SYNTH") || part.category.includes("BLECH") || part.oscIndex >= 10;
+      const totalSemi = Math.round(((part.pitchGlide - 0.5) * 24) + semitoneOffset);
+      const note = isSynth
+        ? Math.max(24, Math.min(108, 60 + totalSemi))
+        : Math.max(36, Math.min(96, 35 + part.id + Math.round(semitoneOffset)));
+      const ch = isSynth ? ((part.id - 1) & 0x0F) : 9; // Ch 10 (9) for Drums (FPC), Part Ch for Synths
+      const durMs = Math.round((0.08 + part.decay * 0.45) * 1000);
+      try {
+        out.send([0x90 | ch, note, vel127]);
+        setTimeout(() => {
+          try { out.send([0x80 | ch, note, 0]); } catch (_) {}
+        }, durMs);
+      } catch (_) {}
+    }
+
+    function sendFlMidiCC(paramKey, normalizedVal) {
+      if (!flMidiEnabled || midiOutputs.length === 0) return;
+      const out = midiOutputs[midiOutIdx];
+      const cc = KNOB_TO_CC[paramKey];
+      if (!out || cc === undefined) return;
+      const val127 = Math.max(0, Math.min(127, Math.round(normalizedVal * 127)));
+      const ch = (selectedPartId - 1) & 0x0F;
+      try {
+        out.send([0xB0 | ch, cc, val127]);
+      } catch (_) {}
+    }
+
+    document.getElementById("btnFlMidi").onclick = async () => {
+      if (!navigator.requestMIDIAccess) {
+        displayNotice = "WEBMIDI NICHT UNTERSTÜTZT (NUTZE EDGE/CHROME + loopMIDI)";
+        renderUI();
+        return;
+      }
+      if (!midiAccess) {
+        try {
+          midiAccess = await navigator.requestMIDIAccess({ sysex: false });
+          midiAccess.onstatechange = () => { refreshMidiPorts(); renderUI(); };
+          refreshMidiPorts();
+        } catch (_) {
+          displayNotice = "MIDI ZUGRIFF VERWEIGERT";
+          renderUI();
+          return;
+        }
+      } else {
+        refreshMidiPorts();
+      }
+      if (!flMidiEnabled) {
+        flMidiEnabled = true;
+        displayNotice = midiOutputs.length > 0
+          ? `FL STUDIO MIDI AKTIV -> ${flMidiOutName} (NOTEN + CC + CLOCK)`
+          : "FL MIDI AN (STARTE loopMIDI FÜR VIRTUELLEN FL-PORT!)";
+      } else if (midiOutputs.length > 1 && midiOutIdx < midiOutputs.length - 1) {
+        midiOutIdx++;
+        flMidiOutName = midiOutputs[midiOutIdx].name || `PORT ${midiOutIdx + 1}`;
+        displayNotice = `FL STUDIO MIDI PORT -> ${flMidiOutName}`;
+      } else {
+        flMidiEnabled = false;
+        midiOutIdx = 0;
+        displayNotice = "FL STUDIO LIVE MIDI: OFF";
+      }
+      renderUI();
+    };
+
+    // --- 1-CLICK .MID (STANDARD MIDI FILE) EXPORT FOR FL STUDIO PIANO ROLL ---
+    function writeVarLen(arr, val) {
+      let buffer = val & 0x7F;
+      while ((val >>= 7)) {
+        buffer <<= 8;
+        buffer |= ((val & 0x7F) | 0x80);
+      }
+      while (true) {
+        arr.push(buffer & 0xFF);
+        if (buffer & 0x80) buffer >>= 8;
+        else break;
+      }
+    }
+
+    function exportFlStudioMidiFile() {
+      const ppqn = 96;
+      const stepTicks = beat8Mode ? (ppqn / 2) : (ppqn / 4); // 1/8 or 1/16 note
+      const activePart = parts[selectedPartId - 1];
+      // Collect events for either active part (if it has steps) or all active parts
+      const targetParts = activePart.activeSteps.size > 0
+        ? [activePart]
+        : parts.filter(p => !p.isMuted && p.activeSteps.size > 0);
+      if (targetParts.length === 0) {
+        // Auto-populate 4-on-the-floor if empty so export always produces a valid file
+        [1, 5, 9, 13].forEach(s => activePart.activeSteps.add(s));
+        targetParts.push(activePart);
+      }
+
+      const events = [];
+      // Tempo meta event
+      const mpqn = Math.round(60000000 / bpm);
+      events.push({
+        tick: 0,
+        bytes: [0xFF, 0x51, 0x03, (mpqn >> 16) & 0xFF, (mpqn >> 8) & 0xFF, mpqn & 0xFF]
+      });
+
+      targetParts.forEach(p => {
+        const isSynth = p.category.includes("SYNTH") || p.category.includes("BLECH") || p.oscIndex >= 10;
+        const ch = isSynth ? ((p.id - 1) & 0x0F) : 9;
+        for (let step = 1; step <= 16; step++) {
+          if (!p.activeSteps.has(step)) continue;
+          const baseTick = (step - 1) * stepTicks;
+          const mp = p.motionPitch[step - 1] >= 0 ? p.motionPitch[step - 1] : p.pitchGlide;
+          const semi = Math.round((mp - 0.5) * 24);
+          const note = isSynth ? Math.max(24, Math.min(108, 60 + semi)) : (35 + p.id);
+          const vel = p.accentSteps.has(step) ? 124 : 96;
+
+          if (p.motionCutoff[step - 1] >= 0) {
+            const ccVal = Math.max(0, Math.min(127, Math.round(p.motionCutoff[step - 1] * 127)));
+            events.push({ tick: baseTick, bytes: [0xB0 | ch, 74, ccVal] });
+          }
+
+          if (p.rollSteps.has(step)) {
+            const subTicks = Math.max(4, Math.floor(stepTicks / 3));
+            for (let r = 0; r < 3; r++) {
+              const tOn = baseTick + r * subTicks;
+              events.push({ tick: tOn, bytes: [0x90 | ch, note, Math.max(60, vel - r * 12)] });
+              events.push({ tick: tOn + subTicks - 1, bytes: [0x80 | ch, note, 0] });
+            }
+          } else {
+            const gateTicks = Math.max(6, Math.floor(stepTicks * 0.8));
+            events.push({ tick: baseTick, bytes: [0x90 | ch, note, vel] });
+            events.push({ tick: baseTick + gateTicks, bytes: [0x80 | ch, note, 0] });
+          }
+        }
+      });
+
+      events.sort((a, b) => a.tick - b.tick);
+      const trackData = [];
+      let lastTick = 0;
+      events.forEach(ev => {
+        writeVarLen(trackData, Math.max(0, ev.tick - lastTick));
+        lastTick = ev.tick;
+        trackData.push(...ev.bytes);
+      });
+      // End of track at bar end (16 steps)
+      writeVarLen(trackData, Math.max(0, 16 * stepTicks - lastTick));
+      trackData.push(0xFF, 0x2F, 0x00);
+
+      const header = [
+        0x4D, 0x54, 0x68, 0x64, 0x00, 0x00, 0x00, 0x06,
+        0x00, 0x00, 0x00, 0x01, (ppqn >> 8) & 0xFF, ppqn & 0xFF,
+        0x4D, 0x54, 0x72, 0x6B,
+        (trackData.length >> 24) & 0xFF, (trackData.length >> 16) & 0xFF,
+        (trackData.length >> 8) & 0xFF, trackData.length & 0xFF
+      ];
+      const midiBytes = new Uint8Array([...header, ...trackData]);
+      const blob = new Blob([midiBytes], { type: "audio/midi" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      const safeName = activePart.name.replace(/[^A-Z0-9_-]/gi, "_");
+      a.href = url;
+      a.download = `BeatForge_PT${String(activePart.id).padStart(2, "0")}_${safeName}_${bpm}BPM.mid`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 3000);
+      displayNotice = `FL STUDIO .MID EXPORTIERT -> ZIEHE IN PIANO ROLL!`;
+      renderUI();
+    }
+    document.getElementById("btnFlExportMid").onclick = exportFlStudioMidiFile;
+
+    // --- 1-CLICK .WAV EXPORT FOR FL STUDIO PLAYLIST / SAMPLER ---
+    function encodeAudioBufferToWav(audioBuffer) {
+      const numSamples = audioBuffer.length;
+      const sampleRate = audioBuffer.sampleRate;
+      const chData = audioBuffer.getChannelData(0);
+      const wavBuf = new ArrayBuffer(44 + numSamples * 2);
+      const view = new DataView(wavBuf);
+      const writeStr = (offset, str) => {
+        for (let i = 0; i < str.length; i++) view.setUint8(offset + i, str.charCodeAt(i));
+      };
+      writeStr(0, "RIFF");
+      view.setUint32(4, 36 + numSamples * 2, true);
+      writeStr(8, "WAVE");
+      writeStr(12, "fmt ");
+      view.setUint32(16, 16, true);
+      view.setUint16(20, 1, true); // PCM
+      view.setUint16(22, 1, true); // Mono
+      view.setUint32(24, sampleRate, true);
+      view.setUint32(28, sampleRate * 2, true);
+      view.setUint16(32, 2, true);
+      view.setUint16(34, 16, true);
+      writeStr(36, "data");
+      view.setUint32(40, numSamples * 2, true);
+      let offset = 44;
+      for (let i = 0; i < numSamples; i++) {
+        const s = Math.max(-1, Math.min(1, chData[i]));
+        view.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+        offset += 2;
+      }
+      return new Blob([wavBuf], { type: "audio/wav" });
+    }
+
+    function exportFlStudioWavFile() {
+      ensureAudio();
+      const activePart = parts[selectedPartId - 1];
+      if (!activePart.audioBuffer) {
+        bakeE2DrumToPart(selectedPartId, false);
+      }
+      const buf = activePart.audioBuffer;
+      if (!buf) return;
+      const blob = encodeAudioBufferToWav(buf);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      const safeName = activePart.name.replace(/[^A-Z0-9_-]/gi, "_");
+      a.href = url;
+      a.download = `BeatForge_PT${String(activePart.id).padStart(2, "0")}_${safeName}.wav`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 3000);
+      displayNotice = `FL STUDIO .WAV EXPORTIERT -> ZIEHE IN PLAYLIST/SAMPLER!`;
+      renderUI();
+    }
+    document.getElementById("btnFlExportWav").onclick = exportFlStudioWavFile;
 
     window.addEventListener("resize", renderUI);
     renderUI();
