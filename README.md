@@ -7,7 +7,7 @@
 ## ✨ Hauptfunktionen
 
 ### 🔴 1. BeatForge XS-2 Modus (Roter Sampler-Modus)
-* **Durchlaufende Lieder & Loops (`+ SONG` / `+ SONG LOOP`):** Importiere komplette Songs oder Loops (`.wav`, `.mp3`, `.m4a`, `.ogg` bis 3 Minuten), die nahtlos im Hintergrund durchlaufen, während du live eigene Kicks, Snares und Hi-Hats auf den Pads 1–16 dazuspielst oder im Sequencer programmierst.
+* **Durchlaufende Lieder & Loops (`+ SONG` / `+ SONG LOOP`):** Importiere komplette Songs oder Loops (`.wav`, `.mp3`, `.m4a`, `.ogg` bis 3 Minuten), die nahtlos im Hintergrund durchlaufen, während du live eigene Kicks, Snares und Hi-Hats auf den Pads 1–15 dazuspielst oder im Sequencer programmierst.
 * **Eigene Kicks & One-Shot Samples (`+ KICK` / `-> TASTE`):** Lade eigene Kick- oder Drum-Samples direkt vom Gerät (oder ziehe sie unter Windows per **Drag & Drop** auf ein Pad) und lege sie frei auf jede beliebige der **16 Tasten (Pads 1–16)**.
 * **26 integrierte Drum-, Synth- & Blechtribe-Oszillatoren:** Von `BD 909 PUNCH`, `SUBWOOFER 808`, `EMX TRIBE KICK`, `SD ANALOG`, `EMX HARD SNARE`, `HAND CLAP`, `CLOSED/OPEN HH` bis hin zu `ACID SAW 303`, `EMX ACID 303`, `EMX HOOVER`, `EMX SUPERSAW`, `EMX FM DONK`, `PCM ORCH HIT`, `PCM CHOIR AAH`, `SUB BASS` und `DUAL SAW LEAD`.
 
@@ -88,9 +88,9 @@ Speziell für Windows 10/11 optimierte Steuerung:
 
 ## 📱 Installation & Nutzung
 
-### 🖥️ Auf Windows 10 / 11 (Desktop-App)
-1. Doppelklicke im Projektordner auf **[`Start_BeatForge_Windows.bat`](./Start_BeatForge_Windows.bat)**.
-2. Die Groovebox öffnet sich sofort als eigenständiges Windows-App-Fenster mit voller PC-Tastatur-, Mausrad-, Drag-&-Drop- und FL-Studio-Unterstützung.
+### 🖥️ Auf Windows 10 / 11 (Eigenständige `.exe` Desktop-App)
+1. Lade einfach die einzelne Datei **[`BeatForge_XS2_Windows.exe`](./BeatForge_XS2_Windows.exe)** herunter (keine weiteren Dateien nötig – der komplette Synthesizer ist direkt in der `.exe` eingebettet!).
+2. Starte **`BeatForge_XS2_Windows.exe`** per Doppelklick – die Groovebox öffnet sich sofort als eigenständiges Windows-App-Fenster mit voller PC-Tastatur-, Mausrad-, Drag-&-Drop- und FL-Studio-Unterstützung.
 
 ### 🍎 Auf iPhone & iPad (iOS Web-App / PWA)
 1. Öffne den **GitHub Pages Link** dieses Projekts in **Safari** auf deinem iPhone oder iPad.
@@ -105,8 +105,9 @@ Speziell für Windows 10/11 optimierte Steuerung:
 ---
 
 ## 🛠️ Projektstruktur
-* `Start_BeatForge_Windows.bat` – Windows-Desktop-Starter (öffnet die App im nativen App-Fenster).
+* `BeatForge_XS2_Windows.exe` – Eigenständige Windows-Desktop-App (Single-File `.exe` mit eingebetteter Synth-Engine & Icon).
+* `Start_BeatForge_Windows.bat` – Alternativer Windows-Starter im Projektordner.
 * `ios_webapp/index.html`, `ios_webapp/manifest.json` & `ios_webapp/icon.svg` – Komplette Windows-, iOS- & Web-Version (HTML5 + WebAudio + WebMIDI PWA).
 * `app/src/main/java/com/example/es2korg/MainActivity.kt` – Native Android Jetpack Compose Hardware-UI + USB-MIDI.
 * `app/src/main/java/com/example/es2korg/ElectribeAudioEngine.kt` – Echtzeit-Polyphonie-Synthesizer, Drum-Creator, Valve-Force-Tube, MIDI-Exporter & Sampler-Engine (44.1 kHz PCM).
-* `BeatForge_XS2_Sampler.apk` – Fertige Android-Installationsdatei.
+* `BeatForge_XS2_Sampler.apk` – Fertige, komprimierte Android-Installationsdatei (1,59 MB).
