@@ -7,7 +7,7 @@
 ## ✨ Hauptfunktionen
 
 ### 🔴 1. BeatForge XS-2 Modus (Roter Sampler-Modus)
-* **Durchlaufende Lieder & Loops (`+ SONG` / `+ SONG LOOP`):** Importiere komplette Songs oder Loops (`.wav`, `.mp3`, `.m4a`, `.ogg` bis 3 Minuten), die nahtlos im Hintergrund durchlaufen, während du live eigene Kicks, Snares und Hi-Hats auf den Pads 1–15 dazuspielst oder im Sequencer programmierst.
+* **Durchlaufende Lieder & Loops (`+ SONG` / `+ SONG LOOP`):** Importiere komplette Songs oder Loops (`.wav`, `.mp3`, `.m4a`, `.ogg` bis 3 Minuten), die nahtlos im Hintergrund durchlaufen, während du live eigene Kicks, Snares und Hi-Hats auf den Pads 1–16 dazuspielst oder im Sequencer programmierst.
 * **Eigene Kicks & One-Shot Samples (`+ KICK` / `-> TASTE`):** Lade eigene Kick- oder Drum-Samples direkt vom Gerät (oder ziehe sie unter Windows per **Drag & Drop** auf ein Pad) und lege sie frei auf jede beliebige der **16 Tasten (Pads 1–16)**.
 * **26 integrierte Drum-, Synth- & Blechtribe-Oszillatoren:** Von `BD 909 PUNCH`, `SUBWOOFER 808`, `EMX TRIBE KICK`, `SD ANALOG`, `EMX HARD SNARE`, `HAND CLAP`, `CLOSED/OPEN HH` bis hin zu `ACID SAW 303`, `EMX ACID 303`, `EMX HOOVER`, `EMX SUPERSAW`, `EMX FM DONK`, `PCM ORCH HIT`, `PCM CHOIR AAH`, `SUB BASS` und `DUAL SAW LEAD`.
 
