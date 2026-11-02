@@ -458,6 +458,7 @@
             <div class="hw-btn" id="btnMotSeq">MOT.SEQ</div>
           </div>
           <div class="btn-row">
+            <div class="hw-btn" id="btnPtMute">PT MUTE</div>
             <div class="hw-btn" id="btnDice">🎲 DICE</div>
             <div class="hw-btn" id="btnErase">ERASE</div>
           </div>
@@ -1011,7 +1012,12 @@
 
       if (currentPadMode === "TRIGGER") {
         selectedPartId = index;
-        displayNotice = null;
+        if (part.isMuted) {
+          part.isMuted = false;
+          displayNotice = `PT ${index} UNMUTED & TRIGGERED!`;
+        } else {
+          displayNotice = null;
+        }
         triggerPart(index, 1.0);
         if (isRecording && isPlaying && !(part.hasCustomSample && part.loopSample)) {
           part.activeSteps.add(currentStep);
@@ -1058,7 +1064,17 @@
         }
       } else if (currentPadMode === "MUTE") {
         part.isMuted = !part.isMuted;
-        if (part.isMuted) stopPartLoop(part);
+        if (part.isMuted) {
+          stopPartLoop(part);
+          displayNotice = `PT ${index} (${part.name}): MUTED (STUMM)`;
+        } else {
+          if (part.hasCustomSample && part.loopSample && isPlaying && !part.activeSource) {
+            triggerPart(index, 0.95);
+          } else if (!(part.hasCustomSample && part.loopSample)) {
+            triggerPart(index, 0.85);
+          }
+          displayNotice = `PT ${index} (${part.name}): UNMUTED (AKTIV)!`;
+        }
       }
       renderUI();
     }
@@ -1142,21 +1158,28 @@
       isRecording = !isRecording;
       renderUI();
     };
-    document.getElementById("modeTrigger").onclick = () => { currentPadMode = "TRIGGER"; renderUI(); };
-    document.getElementById("modeSeq").onclick = () => { currentPadMode = "STEP_SEQ"; renderUI(); };
+    document.getElementById("modeTrigger").onclick = () => {
+      currentPadMode = "TRIGGER";
+      displayNotice = "MODE: TRIGGER (LIVE PLAY)";
+      renderUI();
+    };
+    document.getElementById("modeSeq").onclick = () => {
+      currentPadMode = currentPadMode === "STEP_SEQ" ? "TRIGGER" : "STEP_SEQ";
+      renderUI();
+    };
     document.getElementById("modeKeyb").onclick = () => {
-      currentPadMode = "KEYBOARD";
-      displayNotice = `BLECH KEYBOARD + NOTENASSISTENT (${SCALES[scaleIdx].label})`;
+      currentPadMode = currentPadMode === "KEYBOARD" ? "TRIGGER" : "KEYBOARD";
+      displayNotice = currentPadMode === "KEYBOARD" ? `BLECH KEYBOARD + NOTENASSISTENT (${SCALES[scaleIdx].label})` : "MODE: TRIGGER";
       renderUI();
     };
     document.getElementById("modeAccent").onclick = () => {
-      currentPadMode = "ACCENT";
-      displayNotice = "BLECHTRIBE ACCENT: TIPPE STEPS FÜR +40% PUNCH!";
+      currentPadMode = currentPadMode === "ACCENT" ? "TRIGGER" : "ACCENT";
+      displayNotice = currentPadMode === "ACCENT" ? "BLECHTRIBE ACCENT: TIPPE STEPS FÜR +40% PUNCH!" : "MODE: TRIGGER";
       renderUI();
     };
     document.getElementById("modeRoll").onclick = () => {
-      currentPadMode = "STEP_ROLL";
-      displayNotice = "BLECHTRIBE ROLL: TIPPE STEPS FÜR 3X RATCHET!";
+      currentPadMode = currentPadMode === "STEP_ROLL" ? "TRIGGER" : "STEP_ROLL";
+      displayNotice = currentPadMode === "STEP_ROLL" ? "BLECHTRIBE ROLL: TIPPE STEPS FÜR 3X RATCHET!" : "MODE: TRIGGER";
       renderUI();
     };
     document.getElementById("btnBeat8").onclick = () => {
@@ -1164,7 +1187,16 @@
       displayNotice = beat8Mode ? "BLECH BEAT 8 ON (1/8 STEPS - DOPPELT SO LANG)" : "BEAT 16 (NORMAL)";
       renderUI();
     };
-    document.getElementById("modeMute").onclick = () => { currentPadMode = "MUTE"; renderUI(); };
+    document.getElementById("modeMute").onclick = () => {
+      if (currentPadMode === "MUTE") {
+        currentPadMode = "TRIGGER";
+        displayNotice = "MUTE MODE BEENDET -> TRIGGER MODE";
+      } else {
+        currentPadMode = "MUTE";
+        displayNotice = "MUTE MODE: TIPPE PAD 1-16 ZUM MUTE / UNMUTE (NOCHMAL MUTE = ZURÜCK)";
+      }
+      renderUI();
+    };
 
     document.getElementById("btnTube").onclick = () => {
       valveForceTube = valveForceTube >= 0.95 ? 0.0 : Math.min(1.0, valveForceTube + 0.25);
@@ -1307,6 +1339,29 @@
       p.insertFxEnabled = !p.insertFxEnabled;
       renderUI();
     };
+    document.getElementById("btnPtMute").onclick = () => {
+      const p = parts[selectedPartId - 1];
+      const anyMuted = parts.some(x => x.isMuted);
+      if (p.isMuted) {
+        p.isMuted = false;
+        if (p.hasCustomSample && p.loopSample && isPlaying && !p.activeSource) triggerPart(p.id, 0.95);
+        else triggerPart(p.id, 0.85);
+        displayNotice = `PT ${p.id} UNMUTED (AKTIV)!`;
+      } else if (anyMuted) {
+        parts.forEach(x => {
+          if (x.isMuted) {
+            x.isMuted = false;
+            if (x.hasCustomSample && x.loopSample && isPlaying && !x.activeSource) triggerPart(x.id, 0.95);
+          }
+        });
+        displayNotice = "ALLE 16 PARTS UNMUTED (AKTIV)!";
+      } else {
+        p.isMuted = true;
+        stopPartLoop(p);
+        displayNotice = `PT ${p.id} MUTED (STUMM)`;
+      }
+      renderUI();
+    };
     document.getElementById("btnDice").onclick = () => {
       const p = parts[selectedPartId - 1];
       const isSynth = p.category.includes("SYNTH") || p.category.includes("BLECH") || p.oscIndex >= 10;
@@ -1439,6 +1494,11 @@
       document.getElementById("btnAssignPad").textContent = isAssigningToPad ? "PAD WÄHLEN" : "-> TASTE";
       document.getElementById("btnTube").className = `hw-btn ${valveForceTube > 0.01 ? "active-amber" : ""}`;
       document.getElementById("btnTube").textContent = `TUBE ${Math.round(valveForceTube * 100)}%`;
+      const anyMuted = parts.some(x => x.isMuted);
+      const ptMuteBtn = document.getElementById("btnPtMute");
+      ptMuteBtn.className = `hw-btn ${activePart.isMuted ? "active-red" : anyMuted ? "active-amber" : ""}`;
+      ptMuteBtn.textContent = activePart.isMuted ? "UNMUTE" : anyMuted ? "UNM.ALL" : "PT MUTE";
+
       document.getElementById("btnMotSeq").className = `hw-btn ${activePart.motionSeqMode === "REC" ? "active-red" : activePart.motionSeqMode === "PLAY" ? "active-green" : ""}`;
       document.getElementById("btnMotSeq").textContent = `MOT:${activePart.motionSeqMode}`;
       document.getElementById("btnFilterType").textContent = `FLT: ${activePart.filterType}`;
@@ -1452,7 +1512,8 @@
       document.getElementById("modeRoll").className = `fn-btn ${currentPadMode === "STEP_ROLL" ? "active-blue" : ""}`;
       document.getElementById("btnBeat8").className = `fn-btn ${beat8Mode ? "active-purple" : ""}`;
       document.getElementById("btnBeat8").textContent = beat8Mode ? "BEAT 8" : "BEAT 16";
-      document.getElementById("modeMute").className = `fn-btn ${currentPadMode === "MUTE" ? "active-amber" : ""}`;
+      document.getElementById("modeMute").className = `fn-btn ${currentPadMode === "MUTE" ? "active-amber" : anyMuted ? "active-rec" : ""}`;
+      document.getElementById("modeMute").textContent = currentPadMode === "MUTE" ? "MUTE ON" : "MUTE";
       document.getElementById("btnPlay").className = `fn-btn ${isPlaying ? "active-green" : ""}`;
       document.getElementById("btnPlay").textContent = isPlaying ? "❚❚ STOP" : "► PLAY";
       document.getElementById("btnRec").className = `fn-btn ${isRecording ? "active-rec" : ""}`;
@@ -1500,7 +1561,8 @@
         } else if (currentPadMode === "PART_SELECT") {
           if (i === selectedPartId) { color = "#0084D1"; lit = true; }
         } else if (currentPadMode === "MUTE") {
-          if (!p.isMuted) { color = "#D97706"; lit = true; }
+          color = p.isMuted ? "#EF4444" : "#10B981";
+          lit = true;
         }
         padEl.style.background = color;
         padEl.style.borderColor = lit ? "rgba(255,255,255,0.65)" : "#141414";
