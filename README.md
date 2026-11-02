@@ -65,8 +65,7 @@ Direkte Anbindung an **FL Studio** auf Windows (WebMIDI / *loopMIDI*) und Androi
 
 ### 🖥️ 5. Windows Desktop & PC-Optimierung
 Speziell für Windows 10/11 optimierte Steuerung:
-* **1-Klick Windows-Desktop-App Installation (`[🖥️ ALS WINDOWS-APP INSTALLIEREN]`):** Installiert die Groovebox über Microsoft Edge / Google Chrome mit einem Klick als eigenständige Windows-Desktop-App (inkl. Desktop-Verknüpfung, Startmenü-Eintrag und rahmenlosem Fenster) – **100 % ohne `.exe`-Virenscanner-Fehlalarm**!
-* **Offline Single-File Start (`BeatForge_XS2_Windows.html` / `index.html`):** Kann auch komplett offline per Doppelklick gestartet werden.
+* **Eigenständiger Windows Setup-Assistent (`BeatForge_XS2_Setup.exe`):** Installiert die Groovebox mit einem Klick komplett offline auf deinem PC (inkl. Desktop-Verknüpfung, Startmenü-Eintrag und eigenem Hardware-Icon im `1440×860` Studio-Fenster).
 * **PC-Tastatursteuerung (Live-Drumming & Shortcuts):**
   * **`[LEERTASTE]`** – Play / Stop
   * **`[1]` bis `[8]`** – Pads 1–8 direkt spielen / Steps setzen / Muten
@@ -89,17 +88,12 @@ Speziell für Windows 10/11 optimierte Steuerung:
 
 ## 📱 Installation & Nutzung
 
-### 🖥️ Auf Windows 10 / 11 (Setup-Assistent `.exe`, Desktop-App & Offline-Starter)
-1. **Mit Windows Setup-Assistent installieren (`BeatForge_XS2_Setup.exe`):**
-   * Lade **[`BeatForge_XS2_Setup.exe`](./BeatForge_XS2_Setup.exe)** (und optional **[`BeatForge_XS2_Windows.html`](./BeatForge_XS2_Windows.html)** im selben Ordner) herunter und starte die `.exe`.
-   * Im grafischen Setup-Fenster kannst du auswählen:
-     * ✅ **Desktop-Verknüpfung erstellen (`VORTEX BeatForge XS-2`)**
-     * ✅ **Im Windows-Startmenü eintragen**
-   * Klicke auf **`✔ INSTALLIEREN & STARTEN`** (installiert nach `%LocalAppData%\Programs\VortexBeatForgeXS2`) oder auf **`▶ DIREKT STARTEN`**.
-2. **Oder direkt im Browser als Windows-App installieren:**
-   * Öffne **[https://katazune.github.io/beatforge-xs2/](https://katazune.github.io/beatforge-xs2/)** in **Microsoft Edge** oder **Google Chrome** und klicke unten rechts auf **`[🖥️ ALS WINDOWS-APP INSTALLIEREN]`**.
-3. **Oder direkt per Doppelklick ohne Installation:**
-   * Öffne **[`BeatForge_XS2_Windows.html`](./BeatForge_XS2_Windows.html)** per Doppelklick.
+### 🖥️ Auf Windows 10 / 11 (`BeatForge_XS2_Setup.exe`)
+1. Lade die Datei **[`BeatForge_XS2_Setup.exe`](./BeatForge_XS2_Setup.exe)** herunter und starte sie per Doppelklick.
+2. Im grafischen Setup-Fenster kannst du auswählen:
+   * ✅ **Desktop-Verknüpfung erstellen (`VORTEX BeatForge XS-2`)**
+   * ✅ **Im Windows-Startmenü eintragen**
+3. Klicke auf **`✔ INSTALLIEREN & STARTEN`** (installiert nach `%LocalAppData%\Programs\VortexBeatForgeXS2` und legt das Icon auf den Desktop) oder auf **`▶ DIREKT STARTEN`**.
 
 ### 🍎 Auf iPhone & iPad (iOS Web-App / PWA)
 1. Öffne **[https://katazune.github.io/beatforge-xs2/](https://katazune.github.io/beatforge-xs2/)** in **Safari** auf deinem iPhone oder iPad.
@@ -114,9 +108,8 @@ Speziell für Windows 10/11 optimierte Steuerung:
 ---
 
 ## 🛠️ Projektstruktur
-* `BeatForge_XS2_Setup.exe` – Grafischer Windows-Installationsassistent & Studio-Starter (mit Desktop- & Startmenü-Verknüpfung, 19 KB, ohne eingebettete Skript-Ressourcen gegen Defender-Fehlalarme).
-* `BeatForge_XS2_Windows.html` – Eigenständige Single-File Windows-Desktop-Version (mit eingebettetem Icon).
-* `ios_webapp/index.html`, `ios_webapp/manifest.json` & `ios_webapp/icon.svg` – Komplette Windows-, iOS- & Web-Version (HTML5 + WebAudio + WebMIDI PWA).
+* `BeatForge_XS2_Setup.exe` – Eigenständiger Windows-Installationsassistent & Studio-Starter (All-in-One `.exe`, 42 KB, inkl. Desktop- & Startmenü-Verknüpfung).
+* `BeatForge_XS2_Sampler.apk` – Fertige, komprimierte Android-Installationsdatei (1,59 MB).
 * `app/src/main/java/com/example/es2korg/MainActivity.kt` – Native Android Jetpack Compose Hardware-UI + USB-MIDI.
 * `app/src/main/java/com/example/es2korg/ElectribeAudioEngine.kt` – Echtzeit-Polyphonie-Synthesizer, Drum-Creator, Valve-Force-Tube, MIDI-Exporter & Sampler-Engine (44.1 kHz PCM).
-* `BeatForge_XS2_Sampler.apk` – Fertige, komprimierte Android-Installationsdatei (1,59 MB).
+* `ios_webapp/` – iOS- & Web-Version für GitHub Pages (iPhone & iPad PWA).

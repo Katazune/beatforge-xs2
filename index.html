@@ -578,7 +578,7 @@
     <!-- WINDOWS / PC KEYBOARD & MOUSE HOTKEY BAR -->
     <div class="pc-hotkey-bar">
       <span><b>[LEERTASTE]</b> Play/Stop • <b>[1-8 &amp; Q-I]</b> Pads 1-16 • <b>[M]</b> Mute • <b>[Shift+M]</b> Unmute All • <b>[S]</b> Seq • <b>[K]</b> Keyb • <b>[D]</b> 🎲 Dice • <b>[B]</b> XT2 Blau</span>
-      <span><b>[Mausrad]</b> Regler fein • <b>[Doppelklick]</b> Reset • <b>[Drag &amp; Drop]</b> WAV/MP3 auf Pad ziehen • <b id="btnFullscreen" style="cursor:pointer;text-decoration:underline;">[F11 Vollbild]</b></span>
+      <span><b>[Mausrad]</b> Regler • <b>[Doppelklick]</b> Reset • <b>[Drag &amp; Drop]</b> WAV/MP3 • <b id="btnInstallWinApp" style="cursor:pointer;text-decoration:underline;color:#4ADE80;">[🖥️ ALS WINDOWS-APP INSTALLIEREN]</b> • <b id="btnFullscreen" style="cursor:pointer;text-decoration:underline;">[F11 Vollbild]</b></span>
     </div>
   </div>
 
@@ -829,9 +829,7 @@
 
     function stopAllSongLoops() {
       parts.forEach(p => {
-        if (p.hasCustomSample && p.loopSample) {
-          stopPartLoop(p);
-        }
+        stopPartLoop(p);
       });
     }
 
@@ -1170,6 +1168,14 @@
       if (isAssigningToPad) {
         const srcBuf = lastLoadedKickBuffer || activePart.audioBuffer;
         if (srcBuf) {
+          if (index !== selectedPartId && activePart.audioBuffer === srcBuf) {
+            stopPartLoop(activePart);
+            activePart.hasCustomSample = false;
+            activePart.loopSample = false;
+            activePart.audioBuffer = null;
+            activePart.name = OSC_PRESETS[activePart.oscIndex].name;
+            activePart.category = OSC_PRESETS[activePart.oscIndex].cat;
+          }
           part.audioBuffer = srcBuf;
           part.hasCustomSample = true;
           part.loopSample = false;
@@ -1194,9 +1200,17 @@
 
       if (currentPadMode === "TRIGGER") {
         selectedPartId = index;
+        // Wenn auf diesem Pad (z. B. Pad 16) gerade ein Sample / Song-Loop läuft: per Klick sofort AUSSCHALTEN (Toggle Off)!
+        if (part.hasCustomSample && part.activeSource && (index === 16 || part.loopSample || (part.audioBuffer && part.audioBuffer.duration > 0.8))) {
+          stopPartLoop(part);
+          if (part.loopSample || index === 16) part.isMuted = true;
+          displayNotice = `PAD ${index} (${part.name}): SAMPLE AUSGESCHALTET! (NOCHMAL TIPPEN = AN)`;
+          renderUI();
+          return;
+        }
         if (part.isMuted) {
           part.isMuted = false;
-          displayNotice = `PT ${index} UNMUTED & TRIGGERED!`;
+          displayNotice = `PAD ${index} (${part.name}): SAMPLE WIEDER AN!`;
         } else {
           displayNotice = null;
         }
@@ -1205,8 +1219,18 @@
           part.activeSteps.add(currentStep);
         }
       } else if (currentPadMode === "STEP_SEQ") {
+        if (activePart.id === 16 && activePart.hasCustomSample && activePart.loopSample && index === 16 && activePart.activeSource) {
+          stopPartLoop(activePart);
+          activePart.isMuted = true;
+          displayNotice = "PAD 16 SONG / SAMPLE AUSGESCHALTET!";
+          renderUI();
+          return;
+        }
         if (activePart.activeSteps.has(index)) {
           activePart.activeSteps.delete(index);
+          if (activePart.hasCustomSample && activePart.activeSource && activePart.activeSteps.size === 0) {
+            stopPartLoop(activePart);
+          }
         } else {
           activePart.activeSteps.add(index);
           if (!(activePart.hasCustomSample && activePart.loopSample && activePart.activeSource)) {
@@ -1303,6 +1327,8 @@
       try {
         const audioBuf = await decodeAudioFile(file);
         const songPart = parts[15]; // Part 16
+        stopPartLoop(songPart);
+        songPart.activeSteps.clear();
         songPart.audioBuffer = audioBuf;
         songPart.hasCustomSample = true;
         songPart.loopSample = true;
@@ -1314,7 +1340,7 @@
         if (!isPlaying) startSequencer();
         else triggerPart(16, 1.0);
         if (selectedPartId === 16) selectedPartId = 1;
-        displayNotice = "LIED LÄUFT AUF PT16! FÜGE KICKS AUF PAD 1-15 HINZU";
+        displayNotice = "LIED LÄUFT AUF PT16! (KLICKE PAD 16 ZUM AN/AUSSCHALTEN)";
       } catch (_) {
         displayNotice = "SONG LOAD FEHLER";
       }
@@ -1325,7 +1351,17 @@
     // --- BUTTON LISTENERS ---
     document.getElementById("btnAddKick").onclick = () => kickInput.click();
     document.getElementById("btnKickToPad").onclick = () => kickInput.click();
-    document.getElementById("btnSongLoop").onclick = () => songInput.click();
+    document.getElementById("btnSongLoop").onclick = () => {
+      const sp = parts[15];
+      if (sp.hasCustomSample && sp.activeSource && !sp.isMuted) {
+        stopPartLoop(sp);
+        sp.isMuted = true;
+        displayNotice = "PAD 16 SONG / SAMPLE AUSGESCHALTET! (TIPPE PAD 16 FÜR START)";
+        renderUI();
+      } else {
+        songInput.click();
+      }
+    };
     document.getElementById("btnAssignPad").onclick = () => {
       isAssigningToPad = !isAssigningToPad;
       displayNotice = isAssigningToPad ? "TIPPE AUF EINE TASTE (PAD 1-16) FÜR DEN KICK!" : null;
@@ -1429,10 +1465,12 @@
     function stepValueEncoder(delta) {
       const p = parts[selectedPartId - 1];
       if (menuPageIdx === 0) {
+        stopPartLoop(p);
         p.oscIndex = (p.oscIndex + delta + OSC_PRESETS.length) % OSC_PRESETS.length;
         p.name = OSC_PRESETS[p.oscIndex].name;
         p.category = OSC_PRESETS[p.oscIndex].cat;
         p.hasCustomSample = false;
+        p.loopSample = false;
         p.audioBuffer = null;
         triggerPart(selectedPartId, 0.85);
       } else if (menuPageIdx === 1) {
@@ -1640,6 +1678,26 @@
     };
     document.getElementById("btnErase").onclick = () => {
       const p = parts[selectedPartId - 1];
+      stopPartLoop(p);
+      if (p.hasCustomSample) {
+        p.hasCustomSample = false;
+        p.loopSample = false;
+        p.audioBuffer = null;
+        p.isMuted = false;
+        p.name = OSC_PRESETS[p.oscIndex].name;
+        p.category = OSC_PRESETS[p.oscIndex].cat;
+      } else if (p.activeSteps.size === 0 && parts[15].hasCustomSample) {
+        stopPartLoop(parts[15]);
+        parts[15].hasCustomSample = false;
+        parts[15].loopSample = false;
+        parts[15].audioBuffer = null;
+        parts[15].isMuted = false;
+        parts[15].name = OSC_PRESETS[15].name;
+        parts[15].category = OSC_PRESETS[15].cat;
+        displayNotice = "PAD 16 SAMPLE / SONG GELÖSCHT!";
+        renderUI();
+        return;
+      }
       p.activeSteps.clear();
       p.accentSteps.clear();
       p.rollSteps.clear();
@@ -1765,7 +1823,9 @@
       document.getElementById("btnPlay").textContent = isPlaying ? "❚❚ STOP" : "► PLAY";
       document.getElementById("btnRec").className = `fn-btn ${isRecording ? "active-rec" : ""}`;
       document.getElementById("btnKickToPad").className = `fn-btn ${isAssigningToPad ? "active-purple" : ""}`;
-      document.getElementById("btnSongLoop").className = `fn-btn ${parts[15].hasCustomSample ? "active-green" : ""}`;
+      const songRunning = parts[15].hasCustomSample && parts[15].activeSource && !parts[15].isMuted;
+      document.getElementById("btnSongLoop").className = `fn-btn ${songRunning ? "active-green" : ""}`;
+      document.getElementById("btnSongLoop").textContent = songRunning ? "⏹ SONG AUS (16)" : "+ SONG LOOP";
       const flBtn = document.getElementById("btnFlMidi");
       if (flBtn) {
         flBtn.className = `fn-btn ${flMidiEnabled ? "active-amber" : ""}`;
@@ -1785,9 +1845,9 @@
         } else if (currentPadMode === "TRIGGER") {
           const isStepHit = isPlaying && p.activeSteps.has(currentStep) && !p.isMuted;
           if (isStepHit) { color = "#FF5555"; lit = true; }
-          else if (i === selectedPartId) { color = "#C01525"; lit = true; }
-          else if (p.hasCustomSample && p.loopSample) { color = "#059669"; lit = true; }
-          else if (p.hasCustomSample) { color = "#7C3AED"; lit = true; }
+          else if (p.hasCustomSample && p.loopSample && !p.isMuted && p.activeSource) { color = "#059669"; lit = true; }
+          else if (i === selectedPartId && !p.isMuted) { color = "#C01525"; lit = true; }
+          else if (p.hasCustomSample && !p.isMuted) { color = "#7C3AED"; lit = true; }
         } else if (currentPadMode === "STEP_SEQ") {
           const isStep = activePart.activeSteps.has(i);
           const isPlay = isPlaying && currentStep === i;
@@ -2137,6 +2197,26 @@
       renderUI();
     }
     document.getElementById("btnFlExportWav").onclick = exportFlStudioWavFile;
+
+    // --- WINDOWS 10/11 NATIVE DESKTOP APP INSTALLER (PWA) ---
+    let deferredInstallPrompt = null;
+    window.addEventListener("beforeinstallprompt", e => {
+      e.preventDefault();
+      deferredInstallPrompt = e;
+    });
+    const btnInstallWin = document.getElementById("btnInstallWinApp");
+    if (btnInstallWin) {
+      btnInstallWin.onclick = async () => {
+        if (deferredInstallPrompt) {
+          deferredInstallPrompt.prompt();
+          await deferredInstallPrompt.userChoice;
+          deferredInstallPrompt = null;
+        } else {
+          displayNotice = "WINDOWS APP: KLICKE OBEN RECHTS IN DER ADRESSLEISTE AUF 'APP INSTALLIEREN' (ODER DRÜCKE F11)!";
+          renderUI();
+        }
+      };
+    }
 
     window.addEventListener("resize", renderUI);
     renderUI();
